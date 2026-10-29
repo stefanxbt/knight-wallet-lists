@@ -1,4 +1,13 @@
 {
   "version": 1,
-  "banners": []
+  "banners": [
+    {
+      "id": "sample-welcome",
+      "title": "Banners are live",
+      "text": "This is a sample banner. Switch it off or add your own with the banner forms.",
+      "link": "https://github.com/stefanxbt/knight-wallet-lists",
+      "placement": "home",
+      "active": true
+    }
+  ]
 }
