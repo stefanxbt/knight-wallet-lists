@@ -1,0 +1,61 @@
+name: Add a dApp
+description: Put a dApp on the Explore list in the app.
+title: "Add a dApp"
+body:
+  - type: dropdown
+    id: action
+    attributes:
+      label: Action
+      options:
+        - Add a dApp
+      default: 0
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: dApp name
+      placeholder: Uniswap
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Website address
+      description: Must start with https://. Copy it from the dApp's official site, not from a search ad.
+      placeholder: https://app.uniswap.org
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Short description
+      description: One short sentence shown under the name.
+      placeholder: Swap tokens on Ethereum.
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Category
+      options:
+        - Exchange
+        - Lending
+        - Staking
+        - NFTs
+        - Other
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: Networks
+      description: Which networks does it work on?
+      options:
+        - label: Ethereum
+        - label: BNB Chain
+        - label: Polygon
+        - label: BlackFort
+        - label: Solana
+        - label: Tron
+        - label: Bitcoin
+  - type: checkboxes
+    attributes:
+      label: Show at the top
+      options:
+        - label: Yes, show it in the featured row

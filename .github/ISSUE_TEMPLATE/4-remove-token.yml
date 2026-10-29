@@ -1,0 +1,30 @@
+name: Remove a token
+description: Stop showing a token in the app.
+title: "Remove a token"
+body:
+  - type: dropdown
+    id: action
+    attributes:
+      label: Action
+      options:
+        - Remove a token
+      default: 0
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Network
+      options:
+        - Ethereum
+        - BNB Chain
+        - Polygon
+        - BlackFort
+        - Solana
+        - Tron
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Contract address
+    validations:
+      required: true

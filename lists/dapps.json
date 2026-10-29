@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "dapps": [
+    {
+      "id": "uniswap",
+      "name": "Uniswap",
+      "url": "https://app.uniswap.org",
+      "description": "Swap tokens on Ethereum, Polygon and BNB Chain.",
+      "category": "exchange",
+      "chains": [
+        "ethereum",
+        "polygon",
+        "bsc"
+      ],
+      "featured": true
+    },
+    {
+      "id": "pancakeswap",
+      "name": "PancakeSwap",
+      "url": "https://pancakeswap.finance",
+      "description": "The biggest exchange on BNB Chain.",
+      "category": "exchange",
+      "chains": [
+        "bsc",
+        "ethereum"
+      ],
+      "featured": true
+    },
+    {
+      "id": "jupiter",
+      "name": "Jupiter",
+      "url": "https://jup.ag",
+      "description": "Best swap prices on Solana.",
+      "category": "exchange",
+      "chains": [
+        "solana"
+      ],
+      "featured": true
+    },
+    {
+      "id": "sunswap",
+      "name": "SunSwap",
+      "url": "https://sun.io",
+      "description": "Swap TRX, USDT and other Tron tokens.",
+      "category": "exchange",
+      "chains": [
+        "tron"
+      ],
+      "featured": true
+    },
+    {
+      "id": "1inch",
+      "name": "1inch",
+      "url": "https://app.1inch.io",
+      "description": "Finds the best price across many exchanges.",
+      "category": "exchange",
+      "chains": [
+        "ethereum",
+        "bsc",
+        "polygon"
+      ]
+    },
+    {
+      "id": "quickswap",
+      "name": "QuickSwap",
+      "url": "https://quickswap.exchange",
+      "description": "Swap tokens on Polygon.",
+      "category": "exchange",
+      "chains": [
+        "polygon"
+      ]
+    },
+    {
+      "id": "raydium",
+      "name": "Raydium",
+      "url": "https://raydium.io",
+      "description": "Swap and earn on Solana.",
+      "category": "exchange",
+      "chains": [
+        "solana"
+      ]
+    },
+    {
+      "id": "aave",
+      "name": "Aave",
+      "url": "https://app.aave.com",
+      "description": "Lend and borrow crypto.",
+      "category": "lending",
+      "chains": [
+        "ethereum",
+        "polygon",
+        "bsc"
+      ]
+    },
+    {
+      "id": "venus",
+      "name": "Venus",
+      "url": "https://app.venus.io",
+      "description": "Lend and borrow on BNB Chain.",
+      "category": "lending",
+      "chains": [
+        "bsc"
+      ]
+    },
+    {
+      "id": "justlend",
+      "name": "JustLend",
+      "url": "https://justlend.org",
+      "description": "Lend and borrow on Tron.",
+      "category": "lending",
+      "chains": [
+        "tron"
+      ]
+    },
+    {
+      "id": "lido",
+      "name": "Lido",
+      "url": "https://stake.lido.fi",
+      "description": "Stake ETH and keep it usable.",
+      "category": "staking",
+      "chains": [
+        "ethereum"
+      ]
+    },
+    {
+      "id": "opensea",
+      "name": "OpenSea",
+      "url": "https://opensea.io",
+      "description": "Buy and sell NFTs.",
+      "category": "nft",
+      "chains": [
+        "ethereum",
+        "polygon"
+      ]
+    },
+    {
+      "id": "magic-eden",
+      "name": "Magic Eden",
+      "url": "https://magiceden.io",
+      "description": "NFT market for Solana, Bitcoin and Ethereum.",
+      "category": "nft",
+      "chains": [
+        "solana",
+        "bitcoin",
+        "ethereum"
+      ]
+    }
+  ]
+}

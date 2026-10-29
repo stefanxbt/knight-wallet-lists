@@ -1,0 +1,41 @@
+name: Unblock something
+description: Take a token, NFT or website off the scam blocklist.
+title: "Unblock something"
+body:
+  - type: dropdown
+    id: action
+    attributes:
+      label: Action
+      options:
+        - Unblock something
+      default: 0
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: What is it?
+      options:
+        - Token
+        - NFT collection
+        - Website
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Network
+      description: Pick any for a website, it is not used.
+      options:
+        - Ethereum
+        - BNB Chain
+        - Polygon
+        - BlackFort
+        - Solana
+        - Tron
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Contract address or website
+      description: For a token or NFT, the contract address. For a website, just the address, for example scam-site.com.
+    validations:
+      required: true

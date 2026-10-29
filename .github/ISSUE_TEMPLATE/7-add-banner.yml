@@ -1,0 +1,63 @@
+name: Add a banner
+description: Show a promo banner in the app, for example for a partner wallet or exchange.
+title: "Add a banner"
+body:
+  - type: dropdown
+    id: action
+    attributes:
+      label: Action
+      options:
+        - Add a banner
+      default: 0
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Banner title
+      description: Short, up to 40 letters. You also use this name to switch the banner on or off later.
+      placeholder: Bitget, 50% off fees
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Banner text
+      description: One short line, up to 100 letters.
+      placeholder: Trade with lower fees this month.
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Link
+      description: Where a tap goes. Must start with https://. You can use the partner's referral link here.
+      placeholder: https://www.bitget.com
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Where should it show?
+      options:
+        - Home screen
+        - Explore tab
+        - Swap screen
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Image
+      description: Optional. Drag a PNG, JPG or WebP picture (up to 1 MB, wide like 1200 x 400) into this box and wait until it finishes uploading. Leave it empty for a text-only banner.
+  - type: input
+    attributes:
+      label: First day
+      description: Optional. The first day it shows, like 2026-11-01. Leave it empty to start right away.
+      placeholder: "2026-11-01"
+  - type: input
+    attributes:
+      label: Last day
+      description: Optional. The last day it shows, like 2026-11-30. Leave it empty to keep it running.
+      placeholder: "2026-11-30"
+  - type: checkboxes
+    attributes:
+      label: Switch on
+      description: Leave it unticked to add the banner switched off, and switch it on later.
+      options:
+        - label: Yes, switch it on now

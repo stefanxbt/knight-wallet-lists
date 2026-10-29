@@ -1,0 +1,106 @@
+# Admin for the app's public lists (dApps, tokens, scam blocklist, banners) in /lists.
+#
+# How it works: fill in one of the forms under Issues > New issue. If the repo
+# owner (or a collaborator) sent it, this workflow applies it to the list, saves
+# it to main, replies on the issue and closes it. Requests from anyone else stay
+# open until the owner adds the "approved" label. The app downloads the lists
+# from main, so the change reaches phones without a new app build.
+
+name: Wallet lists
+
+on:
+  issues:
+    types: [opened, labeled]
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  # One change at a time, so two requests never overwrite each other.
+  group: wallet-lists
+  cancel-in-progress: false
+
+jobs:
+  check:
+    if: github.event_name != 'issues'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --no-warnings --test scripts/apply-request.test.mjs
+
+  apply:
+    if: >-
+      github.event_name == 'issues' &&
+      github.event.issue.state == 'open' &&
+      contains(github.event.issue.body, '### Action') &&
+      ((github.event.action == 'opened' && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association)) ||
+       (github.event.action == 'labeled' && github.event.label.name == 'approved'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Apply the request
+        id: apply
+        run: node --no-warnings scripts/apply-request.mjs "$GITHUB_EVENT_PATH" "$RUNNER_TEMP/out"
+        env:
+          # Used only to download a banner picture dropped into the form.
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Save to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lists
+          git commit -F "$RUNNER_TEMP/out/commit.txt"
+          git pull --rebase origin "$DEFAULT_BRANCH"
+          git push origin "HEAD:$DEFAULT_BRANCH"
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+
+      - name: Reply and close
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: |
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/out/message.md"
+          gh issue close "$ISSUE" --repo "$GITHUB_REPOSITORY" --reason completed
+
+      - name: Explain what went wrong
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: |
+          if [ ! -s "$RUNNER_TEMP/out/message.md" ] || ! grep -q '^❌' "$RUNNER_TEMP/out/message.md"; then
+            echo "❌ Something went wrong while saving this change, so nothing was changed. Please try again in a few minutes." > "$RUNNER_TEMP/out/message.md"
+          fi
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/out/message.md"
+
+  # Someone who is not the owner sent a request, for example a user reporting a scam.
+  needs-approval:
+    if: >-
+      github.event_name == 'issues' &&
+      github.event.action == 'opened' &&
+      contains(github.event.issue.body, '### Action') &&
+      !contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Thank them and wait for the owner
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: |
+          gh label create approved --repo "$GITHUB_REPOSITORY" --color 2ea44f --description "Apply this list change" 2>/dev/null || true
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Thanks for the report. The Knight Wallet team will check it. Once they add the **approved** label, the change is made automatically."

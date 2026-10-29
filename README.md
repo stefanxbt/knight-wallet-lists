@@ -1,0 +1,65 @@
+# Knight Wallet lists (the admin backend)
+
+The files in `lists/` control what the app shows. The app downloads them from this
+repo every time it opens, so a change reaches phones without a new app build.
+
+| File | What it controls |
+| --- | --- |
+| `dapps.json` | The dApps on the Explore tab |
+| `tokens.json` | The tokens shown in everyone's wallet (besides the main coins) |
+| `blocklist.json` | Scam tokens and NFTs that get hidden, and scam websites the dApp browser blocks |
+| `banners.json` (+ pictures in `banners/`) | Promo banners on the Home screen, Explore tab or Swap screen |
+
+Nothing about users is ever sent here. These are public lists that every phone
+downloads the same way, which keeps the wallet non-custodial.
+
+## How to make a change (no coding)
+
+Click one of these links, fill in the form and press **Create**. A robot makes
+the change within about a minute, replies on the page and closes it.
+
+- [Add a dApp](https://github.com/stefanxbt/knight-wallet-lists/issues/new?template=1-add-dapp.yml)
+- [Remove a dApp](https://github.com/stefanxbt/knight-wallet-lists/issues/new?template=2-remove-dapp.yml)
+- [Add a token](https://github.com/stefanxbt/knight-wallet-lists/issues/new?template=3-add-token.yml)
+- [Remove a token](https://github.com/stefanxbt/knight-wallet-lists/issues/new?template=4-remove-token.yml)
+- [Block a scam token, NFT or website](https://github.com/stefanxbt/knight-wallet-lists/issues/new?template=5-block-scam.yml)
+- [Unblock something](https://github.com/stefanxbt/knight-wallet-lists/issues/new?template=6-unblock.yml)
+- [Add a banner](https://github.com/stefanxbt/knight-wallet-lists/issues/new?template=7-add-banner.yml)
+- [Switch a banner on or off](https://github.com/stefanxbt/knight-wallet-lists/issues/new?template=8-switch-banner.yml)
+- [Remove a banner](https://github.com/stefanxbt/knight-wallet-lists/issues/new?template=9-remove-banner.yml)
+
+If something is wrong (for example a mistyped address), the robot replies with
+what to fix and changes nothing.
+
+Anyone can use the forms to report a scam. Requests from people other than the
+owner wait until the owner adds the **approved** label on the right side of the
+page.
+
+## Banners
+
+Each banner has a title, one line of text, a link, an optional picture, and a
+place where it shows. It is either switched **on** or **off**, and can have a
+first and last day. A banner only shows while it is on and inside its days, so
+you can keep some running and others ready but switched off. After every banner
+change, the robot replies with a table of all banners and whether each one is
+showing.
+
+The app never counts views or taps and sends nothing back. If a partner wants to
+know how many people came from Knight Wallet, use their referral link as the
+banner link: they count the visits on their side.
+
+## Built-in safety
+
+- Every change is checked before it is saved: addresses must be valid for their
+  network, dApps must use `https://`, and nothing can be listed twice.
+- If the download fails, the app uses the copy built into it.
+- A download can only add blocks, never remove ones that were built into the
+  app. So if a block was already built into the app, unblocking it reaches
+  phones with the next app update.
+- Tokens that are on neither list (for example random airdropped tokens) are not
+  shown at all, which is how most scam tokens are kept out.
+- Banners are never built into the app. If the download fails, no banners
+  show, so a banner you switched off can never come back. Banners whose link is
+  on the scam blocklist are hidden.
+- Scam websites are also checked against MetaMask's open-source phishing list
+  (about 113,000 known scam sites), right on the phone.

@@ -1,0 +1,18 @@
+name: Remove a banner
+description: Delete a banner for good.
+title: "Remove a banner"
+body:
+  - type: dropdown
+    id: action
+    attributes:
+      label: Action
+      options:
+        - Remove a banner
+      default: 0
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Banner title
+    validations:
+      required: true

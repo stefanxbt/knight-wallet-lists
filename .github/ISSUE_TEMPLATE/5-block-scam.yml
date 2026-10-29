@@ -1,0 +1,48 @@
+name: Block a scam
+description: Report a scam token, NFT or website. It gets hidden or blocked in the app.
+title: "Block a scam"
+body:
+  - type: dropdown
+    id: action
+    attributes:
+      label: Action
+      options:
+        - Block a scam
+      default: 0
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: What is it?
+      options:
+        - Token
+        - NFT collection
+        - Website
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Network
+      description: Pick any for a website, it is not used.
+      options:
+        - Ethereum
+        - BNB Chain
+        - Polygon
+        - BlackFort
+        - Solana
+        - Tron
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Contract address or website
+      description: For a token or NFT, the contract address. For a website, just the address, for example scam-site.com.
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Why is it a scam?
+      description: Shown to users as the warning, so keep it short and plain.
+      placeholder: Fake USDT sent to wallets to trick people.
+    validations:
+      required: true

@@ -1,0 +1,19 @@
+name: Remove a dApp
+description: Take a dApp off the Explore list in the app.
+title: "Remove a dApp"
+body:
+  - type: dropdown
+    id: action
+    attributes:
+      label: Action
+      options:
+        - Remove a dApp
+      default: 0
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: dApp name or website
+      placeholder: Uniswap
+    validations:
+      required: true

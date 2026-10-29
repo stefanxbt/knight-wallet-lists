@@ -1,0 +1,27 @@
+name: Switch a banner on or off
+description: Turn a banner on or off without deleting it.
+title: "Switch a banner on or off"
+body:
+  - type: dropdown
+    id: action
+    attributes:
+      label: Action
+      options:
+        - Switch a banner on or off
+      default: 0
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Banner title
+      description: The title you gave it when you added it.
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Switch
+      options:
+        - "On"
+        - "Off"
+    validations:
+      required: true
