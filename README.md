@@ -111,3 +111,20 @@ If nothing needs doing, it says so. You can also run it any time: open
   on the scam blocklist are hidden.
 - Scam websites are also checked against MetaMask's open-source phishing list
   (about 113,000 known scam sites), right on the phone.
+
+## Signed lists
+
+The robot signs the lists every time it saves a change (`lists/manifest.json` and
+`lists/manifest.sig`, made by `scripts/sign.mjs`). The app checks the signature and
+throws away any list that doesn't match, then uses the copy built into it. So a list
+changed any other way (pushed by hand, or tampered with on the way) never reaches
+phones.
+
+- The private key is the `LISTS_SIGNING_KEY` secret. Make it once on
+  [the signing key page](https://stefanxbt.github.io/knight-wallet-lists/admin/signing-key.html),
+  then run [Sign the lists](https://github.com/stefanxbt/knight-wallet-lists/actions/workflows/sign.yml)
+  by hand. The public key goes into the app.
+- Don't edit files in `lists/` by hand on GitHub. Use the forms, or the change will
+  be ignored by the app until the robot signs again.
+- Signing can't help if someone takes over the GitHub account of an admin. Every admin
+  needs a passkey or two-factor login on GitHub.

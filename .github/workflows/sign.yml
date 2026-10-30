@@ -1,0 +1,37 @@
+# Signs the lists by hand: once after the signing key is first saved, and again after a new
+# key. Every change made through the forms is signed by the "Wallet lists" robot already.
+
+name: Sign the lists
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wallet-lists
+  cancel-in-progress: false
+
+jobs:
+  sign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Sign and save to main
+        env:
+          LISTS_SIGNING_KEY: ${{ secrets.LISTS_SIGNING_KEY }}
+        run: |
+          if [ -z "$LISTS_SIGNING_KEY" ]; then echo "::error::Save the LISTS_SIGNING_KEY secret first (see admin/signing-key.html)."; exit 1; fi
+          node --no-warnings scripts/sign.mjs
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lists/manifest.json lists/manifest.sig
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Sign the lists"
+          git push origin HEAD
+      - name: Public key for the app
+        run: echo "Public key (safe to share, goes into the app) $(node -p "require('./lists/manifest.json').publicKey")" >> "$GITHUB_STEP_SUMMARY"
