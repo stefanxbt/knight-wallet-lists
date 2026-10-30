@@ -1,0 +1,65 @@
+# Every three hours the robot checks each outside service the app uses (network nodes,
+# prices, swaps, WalletConnect, the alerts helper, these lists) and saves the result to
+# status/health.json on the "status" branch, which the admin page shows. When something is
+# down it keeps one "Service problem" issue open (GitHub emails it), and closes it once all
+# is well again. "Run workflow" on the Actions page checks right away.
+name: Service health
+
+on:
+  schedule:
+    - cron: '17 */3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: service-health
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check every service
+        run: node --no-warnings scripts/health.mjs > "$RUNNER_TEMP/health.json"
+
+      - name: Save to the status branch
+        run: |
+          git config user.name "knight-lists-robot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin status 2>/dev/null || true
+          if git rev-parse --verify -q origin/status >/dev/null; then
+            git worktree add "$RUNNER_TEMP/status" origin/status
+            git -C "$RUNNER_TEMP/status" checkout -B status
+          else
+            git worktree add --orphan -b status "$RUNNER_TEMP/status"
+          fi
+          mkdir -p "$RUNNER_TEMP/status/status"
+          cp "$RUNNER_TEMP/health.json" "$RUNNER_TEMP/status/status/health.json"
+          cd "$RUNNER_TEMP/status"
+          git add status/health.json
+          # One commit kept (amended each time), so the branch never grows.
+          if git rev-parse -q --verify HEAD >/dev/null; then git commit -q --amend -m "Service health"; else git commit -q -m "Service health"; fi
+          git push -q --force origin status
+
+      - name: Open or close the "Service problem" issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          down=$(jq -r '[.services[] | select(.status == "down")] | map("- **\(.name)** (\(.usedFor)): \(.detail)\(if .hint then " — " + .hint else "" end)") | join("\n")' "$RUNNER_TEMP/health.json")
+          open=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --label health --json number --jq '.[0].number // empty')
+          if [ -n "$down" ]; then
+            body=$(printf 'These services did not answer at the last check (%s UTC):\n\n%s\n\nThe admin page shows the full picture. Network nodes sometimes have short hiccups; if it is still here at the next check, it needs a look.' "$(jq -r .checkedAt "$RUNNER_TEMP/health.json")" "$down")
+            gh label create health --repo "$GITHUB_REPOSITORY" --color D93F0B --description "Service health check" 2>/dev/null || true
+            if [ -n "$open" ]; then gh issue edit "$open" --repo "$GITHUB_REPOSITORY" --body "$body"
+            else gh issue create --repo "$GITHUB_REPOSITORY" --title "Service problem" --label health --body "$body"; fi
+          elif [ -n "$open" ]; then
+            gh issue close "$open" --repo "$GITHUB_REPOSITORY" --comment "All services answer again."
+          fi

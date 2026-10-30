@@ -70,6 +70,7 @@ li:first-child { border-top: 0; }
 .note { color: var(--muted); font-size: 13px; margin: 0; }
 .error { color: var(--red); }
 details summary { cursor: pointer; color: var(--blue); font-size: 14px; }
+.svc { font-variant-numeric: tabular-nums; }
 .chain { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; padding-top: 10px; }
 @media (prefers-reduced-motion: no-preference) { section { animation: in .35s ease both; } @keyframes in { from { transform: translateY(6px); } } }
 </style>
@@ -89,6 +90,12 @@ details summary { cursor: pointer; color: var(--blue); font-size: 14px; }
   <section id="attention" hidden>
     <h2>Needs you</h2>
     <ul id="attention-list"></ul>
+  </section>
+
+  <section>
+    <div class="head"><h2>Services</h2><a class="btn" id="check-now">Check now</a></div>
+    <p class="note" id="health-note">Loading the latest check…</p>
+    <ul id="health"></ul>
   </section>
 
   <section>
@@ -264,12 +271,55 @@ async function extras() {
   fill('attention-list', attention, '');
 }
 
-main().catch((e) => {
+// The robot checks every outside service every three hours (.github/workflows/health.yml).
+const HEALTH_URL = `https://raw.githubusercontent.com/${REPO}/status/status/health.json`;
+const HEALTH_PILL = { ok: ['Working', 'on'], slow: ['Slow', 'wait'], warn: ['Check', 'wait'], down: ['Down', 'crit'] };
+const GROUPS = { networks: 'Networks', prices: 'Prices', apps: 'Swaps and dApps', knight: 'Knight' };
+function ago(iso) {
+  const min = Math.round((Date.now() - new Date(iso)) / 60000);
+  return min < 1 ? 'just now' : min < 60 ? `${min} min ago` : `${Math.round(min / 60)} h ago`;
+}
+async function health() {
+  document.getElementById('check-now').href = `https://github.com/${REPO}/actions/workflows/health.yml`;
+  const note = document.getElementById('health-note');
+  try {
+    const r = await fetch(`${HEALTH_URL}?t=${Date.now()}`, { cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status === 404 ? 'No check has run yet. Press "Check now", then "Run workflow".' : `HTTP ${r.status}`);
+    const report = await r.json();
+    const { ok, slow, warn, down } = report.summary;
+    const total = report.services.length;
+    note.textContent = `Checked ${ago(report.checkedAt)} (${new Date(report.checkedAt).toLocaleString()}). Every three hours; GitHub emails you when something is down.`;
+    document.getElementById('strip').append(el('div', { class: `stat ${down ? 'bad' : slow + warn ? 'warn' : 'ok'}` },
+      el('b', { text: `${ok}/${total}` }), el('small', { text: down ? `services working, ${down} down` : 'services working' })));
+    const byGroup = {};
+    for (const svc of report.services) (byGroup[svc.group] ??= []).push(svc);
+    fill('health', Object.entries(byGroup).flatMap(([group, list]) => [
+      el('li', { class: 'chain', text: GROUPS[group] ?? group }),
+      ...list.map((svc) => {
+        const [text, cls] = HEALTH_PILL[svc.status];
+        return row(svc.name, el('p', {}, `${svc.usedFor}. `, el('span', { class: 'mono svc', text: `${svc.detail} · ${svc.ms} ms` }), svc.hint ? el('span', { text: ` ${svc.hint}` }) : null), pill(text, cls));
+      }),
+    ]), 'No services in the report.');
+    const bad = report.services.filter((svc) => svc.status === 'down');
+    if (bad.length) {
+      const list = document.getElementById('attention-list');
+      if (list.querySelector('.empty') || !list.textContent.trim()) list.replaceChildren();
+      list.append(row(`${bad.length} service${bad.length > 1 ? 's' : ''} down`, bad.map((svc) => svc.name).join(', '), pill('Services', 'crit')));
+      document.getElementById('attention').hidden = false;
+    }
+  } catch (e) {
+    note.textContent = `The service check could not be loaded: ${e.message}`;
+    fill('health', [], '');
+  }
+}
+
+const lists = main().catch((e) => {
   const p = document.getElementById('loaded');
   p.textContent = `The lists could not be loaded (${e.message}). Try reloading the page.`;
   p.className = 'sub error';
 });
-extras();
+// The service check adds to the strip and to "Needs you", so it runs after both are filled.
+Promise.all([lists, extras()]).then(health);
 </script>
 </body>
 </html>
