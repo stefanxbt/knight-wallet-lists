@@ -1,0 +1,334 @@
+{
+  "version": 1,
+  "checkedAt": "2026-11-01T21:51:38.481Z",
+  "summary": {
+    "ok": 32,
+    "slow": 0,
+    "warn": 0,
+    "down": 1
+  },
+  "services": [
+    {
+      "group": "networks",
+      "name": "Ethereum",
+      "usedFor": "Balances and sending",
+      "status": "ok",
+      "ms": 455,
+      "detail": "block 26322725"
+    },
+    {
+      "group": "networks",
+      "name": "Ethereum Sepolia (test)",
+      "usedFor": "Test sending",
+      "status": "ok",
+      "ms": 421,
+      "detail": "block 12043808"
+    },
+    {
+      "group": "networks",
+      "name": "BNB Chain",
+      "usedFor": "Balances and sending",
+      "status": "ok",
+      "ms": 450,
+      "detail": "block 131124084"
+    },
+    {
+      "group": "networks",
+      "name": "BNB Chain test",
+      "usedFor": "Test sending",
+      "status": "ok",
+      "ms": 466,
+      "detail": "block 140264630"
+    },
+    {
+      "group": "networks",
+      "name": "Polygon",
+      "usedFor": "Balances and sending",
+      "status": "ok",
+      "ms": 513,
+      "detail": "block 96576295"
+    },
+    {
+      "group": "networks",
+      "name": "Polygon Amoy (test)",
+      "usedFor": "Test sending",
+      "status": "ok",
+      "ms": 521,
+      "detail": "block 51747322"
+    },
+    {
+      "group": "networks",
+      "name": "Base",
+      "usedFor": "Balances and sending",
+      "status": "ok",
+      "ms": 522,
+      "detail": "block 53390275"
+    },
+    {
+      "group": "networks",
+      "name": "Base Sepolia (test)",
+      "usedFor": "Test sending",
+      "status": "ok",
+      "ms": 529,
+      "detail": "block 53240151"
+    },
+    {
+      "group": "networks",
+      "name": "Arbitrum",
+      "usedFor": "Balances and sending",
+      "status": "ok",
+      "ms": 571,
+      "detail": "block 520390059"
+    },
+    {
+      "group": "networks",
+      "name": "Arbitrum Sepolia (test)",
+      "usedFor": "Test sending",
+      "status": "ok",
+      "ms": 572,
+      "detail": "block 325113236"
+    },
+    {
+      "group": "networks",
+      "name": "Optimism",
+      "usedFor": "Balances and sending",
+      "status": "ok",
+      "ms": 596,
+      "detail": "block 158985561"
+    },
+    {
+      "group": "networks",
+      "name": "OP Sepolia (test)",
+      "usedFor": "Test sending",
+      "status": "ok",
+      "ms": 600,
+      "detail": "block 50883679"
+    },
+    {
+      "group": "networks",
+      "name": "BlackFort",
+      "usedFor": "BXN balances and sending",
+      "status": "ok",
+      "ms": 924,
+      "detail": "block 21342778"
+    },
+    {
+      "group": "networks",
+      "name": "BlackFort test",
+      "usedFor": "Test sending",
+      "status": "ok",
+      "ms": 935,
+      "detail": "block 7258626"
+    },
+    {
+      "group": "networks",
+      "name": "BlackFortScan",
+      "usedFor": "Backup for BXN balances",
+      "status": "ok",
+      "ms": 465,
+      "detail": "Working"
+    },
+    {
+      "group": "networks",
+      "name": "Solana",
+      "usedFor": "Balances and sending",
+      "status": "ok",
+      "ms": 692,
+      "detail": "slot 464249758"
+    },
+    {
+      "group": "networks",
+      "name": "Solana devnet (test)",
+      "usedFor": "Test sending",
+      "status": "ok",
+      "ms": 734,
+      "detail": "slot 517635456"
+    },
+    {
+      "group": "networks",
+      "name": "HyperEVM",
+      "usedFor": "HYPE balances and sending",
+      "status": "ok",
+      "ms": 848,
+      "detail": "block 50135001"
+    },
+    {
+      "group": "networks",
+      "name": "HyperEVM test",
+      "usedFor": "Test sending",
+      "status": "ok",
+      "ms": 887,
+      "detail": "block 68494420"
+    },
+    {
+      "group": "networks",
+      "name": "Hyperliquid",
+      "usedFor": "Trading balances",
+      "status": "ok",
+      "ms": 1049,
+      "detail": "235 markets"
+    },
+    {
+      "group": "networks",
+      "name": "Bitcoin (mempool.space)",
+      "usedFor": "Balances and sending",
+      "status": "ok",
+      "ms": 450,
+      "detail": "block 974181"
+    },
+    {
+      "group": "networks",
+      "name": "Bitcoin testnet4",
+      "usedFor": "Test sending",
+      "status": "ok",
+      "ms": 448,
+      "detail": "block 158536"
+    },
+    {
+      "group": "networks",
+      "name": "Tron (TronGrid)",
+      "usedFor": "TRX and USDT balances, sending",
+      "status": "ok",
+      "ms": 769,
+      "detail": "block 87632137"
+    },
+    {
+      "group": "networks",
+      "name": "Tron Nile (test)",
+      "usedFor": "Test sending",
+      "status": "ok",
+      "ms": 467,
+      "detail": "block 72344376"
+    },
+    {
+      "group": "prices",
+      "name": "CoinGecko",
+      "usedFor": "Prices, charts, price alerts",
+      "status": "ok",
+      "ms": 299,
+      "detail": "BTC $77897, BXN $0.0004473"
+    },
+    {
+      "group": "prices",
+      "name": "DefiLlama",
+      "usedFor": "Profit and loss history",
+      "status": "ok",
+      "ms": 336,
+      "detail": "Working"
+    },
+    {
+      "group": "prices",
+      "name": "Exchange rates (open.er-api.com)",
+      "usedFor": "Showing values in EUR, AED, KES…",
+      "status": "ok",
+      "ms": 344,
+      "detail": "Working"
+    },
+    {
+      "group": "apps",
+      "name": "LI.FI",
+      "usedFor": "Swap quotes",
+      "status": "ok",
+      "ms": 357,
+      "detail": "65 chains"
+    },
+    {
+      "group": "apps",
+      "name": "WalletConnect relay (Reown)",
+      "usedFor": "Connecting to dApps",
+      "status": "ok",
+      "ms": 554,
+      "detail": "Working"
+    },
+    {
+      "group": "knight",
+      "name": "Instant alerts helper",
+      "usedFor": "Phone alerts for incoming money",
+      "status": "ok",
+      "ms": 385,
+      "detail": "Working"
+    },
+    {
+      "group": "knight",
+      "name": "Live lists",
+      "usedFor": "Banners, dApps, tokens, scam list in the app",
+      "status": "ok",
+      "ms": 420,
+      "detail": "Working"
+    },
+    {
+      "group": "knight",
+      "name": "Scam website list",
+      "usedFor": "Warning before scam sites",
+      "status": "ok",
+      "ms": 736,
+      "detail": "Working"
+    },
+    {
+      "group": "knight",
+      "name": "Test app download",
+      "usedFor": "Invite links and new testers",
+      "status": "down",
+      "ms": 476,
+      "detail": "HTTP 404",
+      "hint": "The app repository is private, so people outside it cannot download the test app from invite links. A public download page fixes this."
+    }
+  ],
+  "features": [
+    {
+      "name": "Balances",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "Test sending",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "Prices and charts",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "Profit and loss",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "Other currencies",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "Swap quotes",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "WalletConnect",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "Instant alerts",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "Banners and lists",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "Scam warnings",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "Hyperliquid trading",
+      "status": "up",
+      "problems": []
+    }
+  ]
+}
