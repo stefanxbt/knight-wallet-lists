@@ -1,0 +1,286 @@
+{
+  "version": 1,
+  "checkedAt": "2026-10-31T19:02:25.976Z",
+  "summary": {
+    "ok": 26,
+    "slow": 0,
+    "warn": 0,
+    "down": 1
+  },
+  "services": [
+    {
+      "group": "networks",
+      "name": "Ethereum",
+      "usedFor": "Balances and sending",
+      "status": "ok",
+      "ms": 530,
+      "detail": "block 26314706"
+    },
+    {
+      "group": "networks",
+      "name": "Ethereum Sepolia (test)",
+      "usedFor": "Test sending",
+      "status": "ok",
+      "ms": 497,
+      "detail": "block 12035795"
+    },
+    {
+      "group": "networks",
+      "name": "BNB Chain",
+      "usedFor": "Balances and sending",
+      "status": "ok",
+      "ms": 538,
+      "detail": "block 130909573"
+    },
+    {
+      "group": "networks",
+      "name": "BNB Chain test",
+      "usedFor": "Test sending",
+      "status": "ok",
+      "ms": 545,
+      "detail": "block 140050072"
+    },
+    {
+      "group": "networks",
+      "name": "Polygon",
+      "usedFor": "Balances and sending",
+      "status": "ok",
+      "ms": 585,
+      "detail": "block 96511927"
+    },
+    {
+      "group": "networks",
+      "name": "Polygon Amoy (test)",
+      "usedFor": "Test sending",
+      "status": "ok",
+      "ms": 582,
+      "detail": "block 51650768"
+    },
+    {
+      "group": "networks",
+      "name": "BlackFort",
+      "usedFor": "BXN balances and sending",
+      "status": "ok",
+      "ms": 911,
+      "detail": "block 21294502"
+    },
+    {
+      "group": "networks",
+      "name": "BlackFort test",
+      "usedFor": "Test sending",
+      "status": "ok",
+      "ms": 913,
+      "detail": "block 7242536"
+    },
+    {
+      "group": "networks",
+      "name": "BlackFortScan",
+      "usedFor": "Backup for BXN balances",
+      "status": "ok",
+      "ms": 439,
+      "detail": "Working"
+    },
+    {
+      "group": "networks",
+      "name": "Solana",
+      "usedFor": "Balances and sending",
+      "status": "ok",
+      "ms": 680,
+      "detail": "slot 463798916"
+    },
+    {
+      "group": "networks",
+      "name": "Solana devnet (test)",
+      "usedFor": "Test sending",
+      "status": "ok",
+      "ms": 678,
+      "detail": "slot 517233179"
+    },
+    {
+      "group": "networks",
+      "name": "HyperEVM",
+      "usedFor": "HYPE balances and sending",
+      "status": "ok",
+      "ms": 828,
+      "detail": "block 50036839"
+    },
+    {
+      "group": "networks",
+      "name": "HyperEVM test",
+      "usedFor": "Test sending",
+      "status": "ok",
+      "ms": 890,
+      "detail": "block 68396258"
+    },
+    {
+      "group": "networks",
+      "name": "Hyperliquid",
+      "usedFor": "Trading balances",
+      "status": "ok",
+      "ms": 909,
+      "detail": "235 markets"
+    },
+    {
+      "group": "networks",
+      "name": "Bitcoin (mempool.space)",
+      "usedFor": "Balances and sending",
+      "status": "ok",
+      "ms": 439,
+      "detail": "block 974008"
+    },
+    {
+      "group": "networks",
+      "name": "Bitcoin testnet4",
+      "usedFor": "Test sending",
+      "status": "ok",
+      "ms": 428,
+      "detail": "block 158393"
+    },
+    {
+      "group": "networks",
+      "name": "Tron (TronGrid)",
+      "usedFor": "TRX and USDT balances, sending",
+      "status": "ok",
+      "ms": 768,
+      "detail": "block 87599971"
+    },
+    {
+      "group": "networks",
+      "name": "Tron Nile (test)",
+      "usedFor": "Test sending",
+      "status": "ok",
+      "ms": 561,
+      "detail": "block 72312300"
+    },
+    {
+      "group": "prices",
+      "name": "CoinGecko",
+      "usedFor": "Prices, charts, price alerts",
+      "status": "ok",
+      "ms": 416,
+      "detail": "BTC $77536, BXN $0.00044683"
+    },
+    {
+      "group": "prices",
+      "name": "DefiLlama",
+      "usedFor": "Profit and loss history",
+      "status": "ok",
+      "ms": 417,
+      "detail": "Working"
+    },
+    {
+      "group": "prices",
+      "name": "Exchange rates (open.er-api.com)",
+      "usedFor": "Showing values in EUR, AED, KES…",
+      "status": "ok",
+      "ms": 384,
+      "detail": "Working"
+    },
+    {
+      "group": "apps",
+      "name": "LI.FI",
+      "usedFor": "Swap quotes",
+      "status": "ok",
+      "ms": 581,
+      "detail": "65 chains"
+    },
+    {
+      "group": "apps",
+      "name": "WalletConnect relay (Reown)",
+      "usedFor": "Connecting to dApps",
+      "status": "ok",
+      "ms": 407,
+      "detail": "Working"
+    },
+    {
+      "group": "knight",
+      "name": "Instant alerts helper",
+      "usedFor": "Phone alerts for incoming money",
+      "status": "ok",
+      "ms": 468,
+      "detail": "Working"
+    },
+    {
+      "group": "knight",
+      "name": "Live lists",
+      "usedFor": "Banners, dApps, tokens, scam list in the app",
+      "status": "ok",
+      "ms": 497,
+      "detail": "Working"
+    },
+    {
+      "group": "knight",
+      "name": "Scam website list",
+      "usedFor": "Warning before scam sites",
+      "status": "ok",
+      "ms": 743,
+      "detail": "Working"
+    },
+    {
+      "group": "knight",
+      "name": "Test app download",
+      "usedFor": "Invite links and new testers",
+      "status": "down",
+      "ms": 543,
+      "detail": "HTTP 404",
+      "hint": "The app repository is private, so people outside it cannot download the test app from invite links. A public download page fixes this."
+    }
+  ],
+  "features": [
+    {
+      "name": "Balances",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "Test sending",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "Prices and charts",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "Profit and loss",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "Other currencies",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "Swap quotes",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "WalletConnect",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "Instant alerts",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "Banners and lists",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "Scam warnings",
+      "status": "up",
+      "problems": []
+    },
+    {
+      "name": "Hyperliquid trading",
+      "status": "up",
+      "problems": []
+    }
+  ]
+}
