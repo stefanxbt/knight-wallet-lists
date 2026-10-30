@@ -71,6 +71,16 @@ li:first-child { border-top: 0; }
 .error { color: var(--red); }
 details summary { cursor: pointer; color: var(--blue); font-size: 14px; }
 .svc { font-variant-numeric: tabular-nums; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.tile { border-radius: 14px; padding: 12px; border: 0.5px solid var(--line); background: var(--glass); display: grid; gap: 4px; min-width: 0; }
+.tile strong { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.tile small { color: var(--muted); font-size: 12.5px; overflow-wrap: anywhere; }
+.dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.dot.up { background: var(--green); box-shadow: 0 0 10px var(--green); } .dot.slow, .dot.partial { background: var(--amber); box-shadow: 0 0 10px var(--amber); } .dot.down { background: var(--red); box-shadow: 0 0 10px var(--red); }
+.tile.down { border-color: rgba(255,138,128,0.4); } .tile.partial, .tile.slow { border-color: rgba(255,184,77,0.35); }
+.spark { flex: none; display: grid; justify-items: end; gap: 2px; }
+.spark svg { display: block; }
+.spark span { font: 12px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
 .chain { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; padding-top: 10px; }
 @media (prefers-reduced-motion: no-preference) { section { animation: in .35s ease both; } @keyframes in { from { transform: translateY(6px); } } }
 </style>
@@ -95,6 +105,18 @@ details summary { cursor: pointer; color: var(--blue); font-size: 14px; }
   <section>
     <div class="head"><h2>Test app</h2><a class="btn primary" id="apk-link" href="https://github.com/stefanxbt/non-custody-wallet/releases/tag/android-test">Download latest APK</a></div>
     <p class="note" id="apk-note">The newest Android test app. Its publish time shows here once test builds are published to this page (needs the LISTS_TOKEN secret).</p>
+  </section>
+
+  <section>
+    <div class="head"><h2>App features</h2></div>
+    <p class="note">Green works, amber works but slow or partly (one network down), red is down. From the last service check.</p>
+    <div class="tiles" id="features"></div>
+  </section>
+
+  <section>
+    <div class="head"><h2>Users</h2></div>
+    <div class="strip" id="users"></div>
+    <p class="note">Knight Wallet keeps no accounts and sends nothing about wallets, so only anonymous totals can be counted. Test app downloads show here once builds are published to this page.</p>
   </section>
 
   <section>
@@ -291,6 +313,33 @@ function ago(iso) {
   const min = Math.round((Date.now() - new Date(iso)) / 60000);
   return min < 1 ? 'just now' : min < 60 ? `${min} min ago` : `${Math.round(min / 60)} h ago`;
 }
+// Answer time over the last 30 days (one dot per check, red where it was down) and the share
+// of checks it worked.
+function spark(history, name) {
+  const points = (history?.checks ?? []).map((c) => c.s[name]).filter(Boolean);
+  if (points.length < 2) return null;
+  const W = 96, H = 24, max = Math.max(...points.map(([, ms]) => ms), 1);
+  const xy = points.map(([, ms], i) => [(i / (points.length - 1)) * W, H - 2 - (ms / max) * (H - 4)]);
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('aria-label', `Answer time, last ${points.length} checks`);
+  const line = document.createElementNS(NS, 'polyline');
+  line.setAttribute('points', xy.map((p) => p.join(',')).join(' '));
+  line.setAttribute('fill', 'none'); line.setAttribute('stroke', 'var(--blue)'); line.setAttribute('stroke-width', '1.5');
+  line.setAttribute('stroke-linejoin', 'round'); line.setAttribute('stroke-linecap', 'round');
+  svg.append(line);
+  points.forEach(([up], i) => {
+    if (up === 1) return;
+    const dot = document.createElementNS(NS, 'circle');
+    dot.setAttribute('cx', xy[i][0]); dot.setAttribute('cy', xy[i][1]); dot.setAttribute('r', 2.2);
+    dot.setAttribute('fill', up === 0 ? 'var(--red)' : 'var(--amber)');
+    svg.append(dot);
+  });
+  const uptime = Math.round((points.filter(([up]) => up > 0).length / points.length) * 1000) / 10;
+  return el('div', { class: 'spark' }, svg, el('span', { text: `${uptime}% up` }));
+}
+
 async function health() {
   document.getElementById('check-now').href = `https://github.com/${REPO}/actions/workflows/health.yml`;
   const note = document.getElementById('health-note');
@@ -303,13 +352,18 @@ async function health() {
     note.textContent = `Checked ${ago(report.checkedAt)} (${new Date(report.checkedAt).toLocaleString()}). Every three hours; GitHub emails you when something is down.`;
     document.getElementById('strip').append(el('div', { class: `stat ${down ? 'bad' : slow + warn ? 'warn' : 'ok'}` },
       el('b', { text: `${ok}/${total}` }), el('small', { text: down ? `services working, ${down} down` : 'services working' })));
+    const FEATURE_TEXT = { up: 'Working', slow: 'Slow', partial: 'Partly down', down: 'Down' };
+    document.getElementById('features').replaceChildren(...(report.features ?? []).map((f) =>
+      el('div', { class: `tile ${f.status}` }, el('strong', {}, el('span', { class: `dot ${f.status}` }), f.name),
+        el('small', { text: f.problems.length ? `${FEATURE_TEXT[f.status]}: ${f.problems.join(', ')}` : FEATURE_TEXT[f.status] }))));
+    const history = await fetch(`${HEALTH_URL.replace('health.json', 'history.json')}?t=${Date.now()}`, { cache: 'no-store' }).then((h) => (h.ok ? h.json() : null)).catch(() => null);
     const byGroup = {};
     for (const svc of report.services) (byGroup[svc.group] ??= []).push(svc);
     fill('health', Object.entries(byGroup).flatMap(([group, list]) => [
       el('li', { class: 'chain', text: GROUPS[group] ?? group }),
       ...list.map((svc) => {
         const [text, cls] = HEALTH_PILL[svc.status];
-        return row(svc.name, el('p', {}, `${svc.usedFor}. `, el('span', { class: 'mono svc', text: `${svc.detail} · ${svc.ms} ms` }), svc.hint ? el('span', { text: ` ${svc.hint}` }) : null), pill(text, cls));
+        return row(svc.name, el('p', {}, `${svc.usedFor}. `, el('span', { class: 'mono svc', text: `${svc.detail} · ${svc.ms} ms` }), svc.hint ? el('span', { text: ` ${svc.hint}` }) : null), spark(history, svc.name), pill(text, cls));
       }),
     ]), 'No services in the report.');
     const bad = report.services.filter((svc) => svc.status === 'down');
@@ -337,6 +391,7 @@ async function testApp() {
     const apk = release.assets.find((a) => a.name.endsWith('.apk'));
     if (!apk) return;
     document.getElementById('apk-link').href = apk.browser_download_url;
+    document.getElementById('users').replaceChildren(el('div', { class: 'stat' }, el('b', { text: String(apk.download_count) }), el('small', { text: 'test app downloads (this build)' })));
     const build = (release.body ?? '').match(/Build (\d+)/)?.[1];
     const when = new Date(apk.updated_at).toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
     note.replaceChildren(`${build ? `Build ${build} · ` : ''}Published ${when} your time `, pill(ago(apk.updated_at), 'on'), ' Tap the button on your phone to install it.');

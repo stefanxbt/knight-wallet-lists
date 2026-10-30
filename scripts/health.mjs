@@ -24,6 +24,9 @@ export const SERVICES = [
   ['networks', 'BlackFortScan', 'Backup for BXN balances', { url: 'https://blackfortscan.com/api?module=block&action=eth_block_number', ok: (b) => typeof b.result === 'string' }],
   ['networks', 'Solana', 'Balances and sending', { url: 'https://api.mainnet-beta.solana.com', init: rpc('getSlot'), ok: (b) => b.result > 0, show: (b) => `slot ${b.result}` }],
   ['networks', 'Solana devnet (test)', 'Test sending', { url: 'https://api.devnet.solana.com', init: rpc('getSlot'), ok: (b) => b.result > 0, show: (b) => `slot ${b.result}` }],
+  ['networks', 'HyperEVM', 'HYPE balances and sending', evm('https://rpc.hyperliquid.xyz/evm')],
+  ['networks', 'HyperEVM test', 'Test sending', evm('https://rpc.hyperliquid-testnet.xyz/evm')],
+  ['networks', 'Hyperliquid', 'Trading balances', { url: 'https://api.hyperliquid.xyz/info', init: { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'meta' }) }, ok: (b) => Array.isArray(b.universe), show: (b) => `${b.universe.length} markets` }],
   ['networks', 'Bitcoin (mempool.space)', 'Balances and sending', { url: 'https://mempool.space/api/blocks/tip/height', ok: (b) => b > 0, show: (b) => `block ${b}` }],
   ['networks', 'Bitcoin testnet4', 'Test sending', { url: 'https://mempool.space/testnet4/api/blocks/tip/height', ok: (b) => b > 0, show: (b) => `block ${b}` }],
   ['networks', 'Tron (TronGrid)', 'TRX and USDT balances, sending', { url: 'https://api.trongrid.io/wallet/getnowblock', init: { method: 'POST' }, ok: (b) => !!b.block_header, show: (b) => `block ${b.block_header.raw_data.number}` }],
@@ -38,6 +41,41 @@ export const SERVICES = [
   ['knight', 'Scam website list', 'Warning before scam sites', { url: 'https://github.com/stefanxbt/knight-wallet-lists/releases/download/scam-sites/meta.json', ok: (b) => typeof b === 'object' && b !== null }],
   ['knight', 'Test app download', 'Invite links and new testers', { url: 'https://github.com/stefanxbt/non-custody-wallet/releases/tag/android-test', head: true, ok: () => true, hint: 'The app repository is private, so people outside it cannot download the test app from invite links. A public download page fixes this.' }],
 ];
+
+// What each app feature needs. "all": every service must work; "any": works while at least
+// one does (balances still show for the other chains if one is down).
+export const FEATURES = [
+  ['Balances', 'any', ['Ethereum', 'BNB Chain', 'Polygon', 'BlackFort', 'HyperEVM', 'Solana', 'Bitcoin (mempool.space)', 'Tron (TronGrid)']],
+  ['Test sending', 'any', ['Ethereum Sepolia (test)', 'BNB Chain test', 'Polygon Amoy (test)', 'BlackFort test', 'HyperEVM test', 'Solana devnet (test)', 'Bitcoin testnet4', 'Tron Nile (test)']],
+  ['Prices and charts', 'all', ['CoinGecko']],
+  ['Profit and loss', 'all', ['DefiLlama']],
+  ['Other currencies', 'all', ['Exchange rates (open.er-api.com)']],
+  ['Swap quotes', 'all', ['LI.FI']],
+  ['WalletConnect', 'all', ['WalletConnect relay (Reown)']],
+  ['Instant alerts', 'all', ['Instant alerts helper']],
+  ['Banners and lists', 'all', ['Live lists']],
+  ['Scam warnings', 'all', ['Scam website list']],
+  ['Hyperliquid trading', 'all', ['Hyperliquid']],
+];
+
+export function featureStatus(services) {
+  const by = Object.fromEntries(services.map((s) => [s.name, s]));
+  return FEATURES.map(([name, rule, needs]) => {
+    const list = needs.map((n) => by[n]).filter(Boolean);
+    const down = list.filter((s) => s.status === 'down').map((s) => s.name);
+    const shaky = list.filter((s) => s.status === 'slow' || s.status === 'warn').map((s) => s.name);
+    const status = down.length === 0 ? (shaky.length ? 'slow' : 'up')
+      : rule === 'any' && down.length < list.length ? 'partial' : 'down';
+    return { name, status, problems: [...down, ...shaky] };
+  });
+}
+
+// Keeps the last 30 days of checks (one every three hours) for the admin charts.
+export const HISTORY_LENGTH = 240;
+export function addToHistory(history, report) {
+  const entry = { t: report.checkedAt, s: Object.fromEntries(report.services.map((x) => [x.name, [x.status === 'ok' ? 1 : x.status === 'down' ? 0 : 0.5, x.ms]])) };
+  return { version: 1, checks: [...(history?.checks ?? []), entry].slice(-HISTORY_LENGTH) };
+}
 
 async function checkOne([group, name, usedFor, c], fetchImpl) {
   const started = Date.now();
@@ -60,10 +98,19 @@ async function checkOne([group, name, usedFor, c], fetchImpl) {
 export async function checkAll(fetchImpl = fetch, now = new Date()) {
   const services = await Promise.all(SERVICES.map((s) => checkOne(s, fetchImpl)));
   const count = (s) => services.filter((x) => x.status === s).length;
-  return { version: 1, checkedAt: now.toISOString(), summary: { ok: count('ok'), slow: count('slow'), warn: count('warn'), down: count('down') }, services };
+  return { version: 1, checkedAt: now.toISOString(), summary: { ok: count('ok'), slow: count('slow'), warn: count('warn'), down: count('down') }, services, features: featureStatus(services) };
 }
 
+// Usage: node scripts/health.mjs > health.json
+//        node scripts/health.mjs --history old-history.json health.json > history.json
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const report = await checkAll();
-  process.stdout.write(JSON.stringify(report, null, 2) + '\n');
+  if (process.argv[2] === '--history') {
+    const { readFileSync, existsSync } = await import('node:fs');
+    const [oldPath, reportPath] = process.argv.slice(3);
+    const old = existsSync(oldPath) ? JSON.parse(readFileSync(oldPath, 'utf8')) : null;
+    process.stdout.write(JSON.stringify(addToHistory(old, JSON.parse(readFileSync(reportPath, 'utf8')))) + '\n');
+  } else {
+    const report = await checkAll();
+    process.stdout.write(JSON.stringify(report, null, 2) + '\n');
+  }
 }

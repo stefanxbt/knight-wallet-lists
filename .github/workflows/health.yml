@@ -43,8 +43,11 @@ jobs:
           fi
           mkdir -p "$RUNNER_TEMP/status/status"
           cp "$RUNNER_TEMP/health.json" "$RUNNER_TEMP/status/status/health.json"
+          # The last 30 days of checks, for the admin charts.
+          node --no-warnings scripts/health.mjs --history "$RUNNER_TEMP/status/status/history.json" "$RUNNER_TEMP/health.json" > "$RUNNER_TEMP/history.json"
+          mv "$RUNNER_TEMP/history.json" "$RUNNER_TEMP/status/status/history.json"
           cd "$RUNNER_TEMP/status"
-          git add status/health.json
+          git add status/health.json status/history.json
           # One commit kept (amended each time), so the branch never grows.
           if git rev-parse -q --verify HEAD >/dev/null; then git commit -q --amend -m "Service health"; else git commit -q -m "Service health"; fi
           git push -q --force origin status
