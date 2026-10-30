@@ -11,6 +11,13 @@ repo every time it opens, so a change reaches phones without a new app build.
 | `banners.json` (+ pictures in `banners/`) | Promo banners on the Home screen, Explore tab or Swap screen |
 | `app-config.json` | Messages to all users, emergency off switches, and the "please update" prompt |
 
+**Scam websites** come from two free public lists, rebuilt every day by the
+"Scam websites" workflow and published on the
+[scam-sites release](https://github.com/stefanxbt/knight-wallet-lists/releases/tag/scam-sites):
+[MetaMask eth-phishing-detect](https://github.com/MetaMask/eth-phishing-detect)
+(DBAD licence) and [ScamSniffer scam-database](https://github.com/scamsniffer/scam-database)
+(GPL-3.0). Our own `blocklist.json` is checked first and always wins.
+
 Nothing about users is ever sent here. These are public lists that every phone
 downloads the same way, which keeps the wallet non-custodial.
 

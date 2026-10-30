@@ -1,0 +1,41 @@
+# Once a day: rebuilds the scam-website list from MetaMask's and ScamSniffer's free public lists
+# and puts it on the "scam-sites" release, where the app downloads it. A release file is replaced
+# each day instead of being committed, so the repo does not grow.
+
+name: Scam websites
+
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+  pull_request:
+    paths: ['scripts/build-phishing*.mjs', '.github/workflows/scam-sites.yml']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scam-sites
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --no-warnings --test scripts/build-phishing.test.mjs
+      - name: Build the list
+        run: node --no-warnings scripts/build-phishing.mjs "$RUNNER_TEMP/scam-sites"
+      - name: Publish it
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd "$RUNNER_TEMP/scam-sites"
+          gh release view scam-sites --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
+            gh release create scam-sites --repo "$GITHUB_REPOSITORY" --title "Scam websites list" \
+              --notes "Rebuilt every day from MetaMask eth-phishing-detect (DBAD licence) and ScamSniffer scam-database (GPL-3.0). Used by the Knight Wallet app to warn before opening scam sites."
+          gh release upload scam-sites blocked.bin meta.json --repo "$GITHUB_REPOSITORY" --clobber
