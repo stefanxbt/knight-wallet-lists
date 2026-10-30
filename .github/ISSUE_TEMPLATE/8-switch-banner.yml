@@ -12,12 +12,14 @@ body:
     validations:
       required: true
   - type: input
+    id: banner-title
     attributes:
       label: Banner title
       description: The title you gave it when you added it.
     validations:
       required: true
   - type: dropdown
+    id: switch
     attributes:
       label: Switch
       options:

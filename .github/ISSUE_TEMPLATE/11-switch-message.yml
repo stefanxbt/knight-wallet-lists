@@ -1,0 +1,30 @@
+name: Switch a message on, off or delete it
+description: Stop or restart a message you sent to all users.
+title: "Switch a message"
+body:
+  - type: dropdown
+    id: action
+    attributes:
+      label: Action
+      options:
+        - Switch a message
+      default: 0
+    validations:
+      required: true
+  - type: input
+    id: message-title
+    attributes:
+      label: Message title
+      description: The title you gave it.
+    validations:
+      required: true
+  - type: dropdown
+    id: switch
+    attributes:
+      label: Switch
+      options:
+        - "On"
+        - "Off"
+        - Delete
+    validations:
+      required: true

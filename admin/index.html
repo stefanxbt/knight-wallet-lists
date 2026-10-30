@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Knight Wallet Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column of glass sections on true black, a status strip on top, actions on every row. */
+:root {
+  --bg: #000;
+  --fg: #F5F6F8;
+  --body: #B3BAC6;
+  --muted: #8A919D;
+  --blue: #5B9DFF;
+  --green: #3EE0A1;
+  --amber: #FFB84D;
+  --red: #FF8A80;
+  --glass: rgba(255,255,255,0.05);
+  --line: rgba(255,255,255,0.09);
+  --sans: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--fg); font: 15px/1.5 var(--sans);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: max(24px, env(safe-area-inset-top, 0px)) 64px;
+}
+main { max-width: 860px; margin: 0 auto; display: grid; gap: 20px; }
+header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+h1 span { color: var(--blue); }
+h2 { font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.sub { color: var(--muted); margin: 4px 0 0; font-size: 14px; }
+a { color: var(--blue); }
+section { background: var(--glass); border: 0.5px solid var(--line); border-radius: 18px; padding: 18px; display: grid; gap: 12px; min-width: 0; }
+.head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.stat { background: var(--glass); border: 0.5px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.stat b { display: block; font: 600 22px/1.2 var(--mono); font-variant-numeric: tabular-nums; }
+.stat small { color: var(--muted); font-size: 12.5px; }
+.stat.warn b { color: var(--amber); } .stat.bad b { color: var(--red); } .stat.ok b { color: var(--green); }
+ul { list-style: none; margin: 0; padding: 0; display: grid; }
+li { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-top: 0.5px solid var(--line); flex-wrap: wrap; }
+li:first-child { border-top: 0; }
+.what { flex: 1 1 220px; min-width: 0; }
+.what strong { font-weight: 600; }
+.what p { margin: 2px 0 0; color: var(--body); font-size: 13.5px; overflow-wrap: anywhere; }
+.mono { font-family: var(--mono); font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
+.pill { font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 99px; white-space: nowrap; }
+.on { background: rgba(62,224,161,0.14); color: var(--green); }
+.wait { background: rgba(255,184,77,0.12); color: var(--amber); }
+.off { background: rgba(255,255,255,0.07); color: var(--muted); }
+.crit { background: rgba(255,138,128,0.14); color: var(--red); }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font: 500 13.5px var(--sans); color: var(--fg); background: rgba(255,255,255,0.08); border: 0.5px solid var(--line); padding: 7px 12px; border-radius: 10px; }
+.btn:hover { background: rgba(255,255,255,0.13); }
+.btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.btn.primary { background: var(--blue); color: #000; border-color: transparent; font-weight: 600; }
+.btn.danger { color: var(--red); }
+.empty { color: var(--muted); font-size: 14px; padding: 4px 0; }
+.note { color: var(--muted); font-size: 13px; margin: 0; }
+.error { color: var(--red); }
+details summary { cursor: pointer; color: var(--blue); font-size: 14px; }
+.chain { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; padding-top: 10px; }
+@media (prefers-reduced-motion: no-preference) { section { animation: in .35s ease both; } @keyframes in { from { transform: translateY(6px); } } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Knight <span>Wallet</span> Admin</h1>
+      <p class="sub" id="loaded">Loading the live lists…</p>
+    </div>
+    <a class="btn" href="https://github.com/stefanxbt/knight-wallet-lists#how-to-make-a-change-no-coding">How it works</a>
+  </header>
+
+  <div class="strip" id="strip"></div>
+
+  <section id="attention" hidden>
+    <h2>Needs you</h2>
+    <ul id="attention-list"></ul>
+  </section>
+
+  <section>
+    <div class="head"><h2>Emergency switches</h2></div>
+    <ul id="switches"></ul>
+    <p class="note">These only turn a feature off for everyone, and back on. Sending real money stays off until the security audit, whatever this says.</p>
+  </section>
+
+  <section>
+    <div class="head"><h2>Messages to all users</h2><a class="btn primary" id="add-message">+ New message</a></div>
+    <ul id="messages"></ul>
+    <div class="head"><span class="note" id="update-state"></span><a class="btn" id="ask-update">Ask users to update</a></div>
+  </section>
+
+  <section>
+    <div class="head"><h2>Banners</h2><a class="btn primary" id="add-banner">+ New banner</a></div>
+    <ul id="banners"></ul>
+  </section>
+
+  <section>
+    <div class="head"><h2>dApps on Explore</h2><a class="btn primary" id="add-dapp">+ Add dApp</a></div>
+    <ul id="dapps"></ul>
+  </section>
+
+  <section>
+    <div class="head"><h2>Tokens</h2><a class="btn primary" id="add-token">+ Add token</a></div>
+    <ul id="tokens"></ul>
+  </section>
+
+  <section>
+    <div class="head"><h2>Scam blocklist</h2><a class="btn primary" id="block">+ Block a scam</a></div>
+    <ul id="blocked"></ul>
+  </section>
+
+  <section>
+    <div class="head"><h2>Recent changes</h2><a class="btn" href="https://github.com/stefanxbt/knight-wallet-lists/commits/main">All changes</a></div>
+    <ul id="history"></ul>
+  </section>
+</main>
+
+<script>
+const REPO = 'stefanxbt/knight-wallet-lists';
+const NEW = `https://github.com/${REPO}/issues/new`;
+const NETWORK = { ethereum: 'Ethereum', bsc: 'BNB Chain', polygon: 'Polygon', blackfort: 'BlackFort', solana: 'Solana', tron: 'Tron', bitcoin: 'Bitcoin' };
+const FEATURES = [['swap', 'Swaps'], ['walletconnect', 'WalletConnect'], ['dappBrowser', 'dApp browser'], ['send', 'Sending']];
+const PLACE = { home: 'Home', explore: 'Explore', swap: 'Swap' };
+
+// A link that opens a GitHub form with the fields already filled in.
+function form(template, fields = {}) {
+  const q = new URLSearchParams({ template });
+  for (const [k, v] of Object.entries(fields)) q.set(k, v);
+  return `${NEW}?${q}`;
+}
+function el(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') e.className = v; else if (k === 'text') e.textContent = v; else e.setAttribute(k, v);
+  }
+  for (const kid of kids) if (kid) e.append(kid);
+  return e;
+}
+const btn = (text, href, cls = '') => el('a', { class: `btn ${cls}`, href, target: '_blank', rel: 'noopener', text });
+const pill = (text, cls) => el('span', { class: `pill ${cls}`, text });
+const row = (title, detail, state, ...actions) => el('li', {},
+  el('div', { class: 'what' }, el('strong', { text: title }), detail ? (typeof detail === 'string' ? el('p', { text: detail }) : detail) : null),
+  state, el('div', { class: 'actions' }, ...actions));
+const fill = (id, items, emptyText) => {
+  const list = document.getElementById(id);
+  list.replaceChildren(...(items.length ? items : [el('li', {}, el('span', { class: 'empty', text: emptyText }))]));
+};
+
+const today = new Date().toISOString().slice(0, 10);
+function liveState(item) {
+  if (!item.active) return ['Off', 'off'];
+  if (item.start && today < item.start) return [`Starts ${item.start}`, 'wait'];
+  if (item.end && today > item.end) return [`Ended ${item.end}`, 'wait'];
+  return [item.end ? `On until ${item.end}` : 'On', 'on'];
+}
+
+async function getJson(path) {
+  // Same site as this page, so it is always the latest saved version.
+  const r = await fetch(`../lists/${path}?t=${Date.now()}`, { cache: 'no-store' });
+  if (!r.ok) throw new Error(`${path}: ${r.status}`);
+  return r.json();
+}
+
+async function main() {
+  const [dapps, tokens, blocklist, banners, config] = await Promise.all(
+    ['dapps.json', 'tokens.json', 'blocklist.json', 'banners.json', 'app-config.json'].map(getJson));
+
+  const showingBanners = banners.banners.filter((b) => liveState(b)[1] === 'on').length;
+  const liveMessages = config.notices.filter((n) => liveState(n)[1] === 'on').length;
+  const blockedCount = blocklist.tokens.length + blocklist.nfts.length + blocklist.domains.length;
+  const stat = (n, label, cls = '') => el('div', { class: `stat ${cls}` }, el('b', { text: String(n) }), el('small', { text: label }));
+  document.getElementById('strip').replaceChildren(
+    stat(config.switchedOff.length, config.switchedOff.length ? 'features switched off' : 'features off', config.switchedOff.length ? 'bad' : 'ok'),
+    stat(liveMessages, 'messages showing', config.notices.some((n) => n.level === 'critical' && liveState(n)[1] === 'on') ? 'bad' : ''),
+    stat(`${showingBanners}/${banners.banners.length}`, 'banners showing'),
+    stat(dapps.dapps.length, 'dApps'),
+    stat(tokens.tokens.length, 'tokens'),
+    stat(blockedCount, 'scams blocked'),
+  );
+
+  fill('switches', FEATURES.map(([key, label]) => {
+    const off = config.switchedOff.includes(key);
+    return row(label, off ? 'Hidden for everyone right now.' : 'Working normally.', pill(off ? 'Switched off' : 'On', off ? 'crit' : 'on'),
+      btn(off ? 'Turn back on' : 'Turn off for everyone', form('12-emergency-switch.yml', { feature: label, switch: off ? 'Back on' : 'Off for everyone' }), off ? '' : 'danger'));
+  }), '');
+
+  fill('messages', config.notices.map((n) => {
+    const [text, cls] = liveState(n);
+    return row(n.title, n.text, el('span', { class: 'actions' }, pill(n.level, n.level === 'critical' ? 'crit' : n.level === 'warning' ? 'wait' : 'off'), pill(text, cls)),
+      btn(n.active ? 'Switch off' : 'Switch on', form('11-switch-message.yml', { 'message-title': n.title, switch: n.active ? 'Off' : 'On' })),
+      btn('Delete', form('11-switch-message.yml', { 'message-title': n.title, switch: 'Delete' }), 'danger'));
+  }), 'No messages. Use one to warn everyone about a scam, or share news.');
+  document.getElementById('update-state').textContent = config.minVersion
+    ? `Asking everyone below version ${config.minVersion} to update.` : 'Not asking anyone to update.';
+  document.getElementById('ask-update').href = form('13-ask-to-update.yml');
+
+  fill('banners', banners.banners.map((b) => {
+    const [text, cls] = liveState(b);
+    return row(b.title, el('p', {}, `${b.text} `, el('span', { class: 'mono', text: `${PLACE[b.placement]} · ${b.link}` })), pill(text, cls),
+      btn(b.active ? 'Switch off' : 'Switch on', form('8-switch-banner.yml', { 'banner-title': b.title, switch: b.active ? 'Off' : 'On' })),
+      btn('Remove', form('9-remove-banner.yml', { 'banner-title': b.title }), 'danger'));
+  }), 'No banners yet.');
+
+  fill('dapps', dapps.dapps.map((d) => row(d.name, el('p', {}, `${d.description} `, el('span', { class: 'mono', text: `${d.url} · ${d.chains.map((c) => NETWORK[c]).join(', ')}` })),
+    d.featured ? pill('Featured', 'on') : null,
+    btn('Remove', form('2-remove-dapp.yml', { 'dapp-name-or-website': d.name }), 'danger'))), 'No dApps.');
+
+  const byChain = {};
+  for (const t of tokens.tokens) (byChain[t.chain] ??= []).push(t);
+  fill('tokens', Object.entries(byChain).flatMap(([chain, list]) => [
+    el('li', { class: 'chain', text: NETWORK[chain] }),
+    ...list.map((t) => row(`${t.symbol} · ${t.name}`, el('span', { class: 'mono', text: t.address }), null,
+      btn('Remove', form('4-remove-token.yml', { network: NETWORK[chain], 'contract-address': t.address }), 'danger'))),
+  ]), 'No tokens.');
+
+  const blockRows = [
+    ...blocklist.domains.map((d) => ['Website', d.domain, d.reason, d.added, { 'what-is-it': 'Website', network: 'Ethereum', 'contract-address-or-website': d.domain }]),
+    ...blocklist.tokens.map((t) => ['Token', `${t.address} (${NETWORK[t.chain]})`, t.reason, t.added, { 'what-is-it': 'Token', network: NETWORK[t.chain], 'contract-address-or-website': t.address }]),
+    ...blocklist.nfts.map((n) => ['NFT collection', `${n.contract} (${NETWORK[n.chain]})`, n.reason, n.added, { 'what-is-it': 'NFT collection', network: NETWORK[n.chain], 'contract-address-or-website': n.contract }]),
+  ];
+  fill('blocked', blockRows.map(([kind, what, reason, added, fields]) => row(kind, el('p', {}, `${reason} `, el('span', { class: 'mono', text: `${what} · since ${added}` })), null,
+    btn('Unblock', form('6-unblock.yml', fields)))), 'Nothing blocked yet. MetaMask’s list of about 113,000 scam sites is always checked as well.');
+
+  document.getElementById('add-message').href = form('10-send-message.yml');
+  document.getElementById('add-banner').href = form('7-add-banner.yml');
+  document.getElementById('add-dapp').href = form('1-add-dapp.yml');
+  document.getElementById('add-token').href = form('3-add-token.yml');
+  document.getElementById('block').href = form('5-block-scam.yml');
+  for (const a of document.querySelectorAll('header ~ section a.btn')) { a.target = '_blank'; a.rel = 'noopener'; }
+  document.getElementById('loaded').textContent = `Live lists, loaded ${new Date().toLocaleString()}. Every change opens a short form on GitHub.`;
+}
+
+// Things that need a decision: requests from other people and the latest check-up.
+async function extras() {
+  const attention = [];
+  try {
+    const issues = await (await fetch(`https://api.github.com/repos/${REPO}/issues?state=open&per_page=50`)).json();
+    for (const i of issues) {
+      if (i.pull_request) continue;
+      const checkup = i.labels.some((l) => l.name === 'check-up');
+      if (checkup && !/Everything looks fine/.test(i.body ?? '')) attention.push(row(i.title, 'The weekly check-up found something to look at.', pill('Check-up', 'wait'), btn('Open', i.html_url)));
+      else if (!checkup && (i.body ?? '').includes('### Action')) attention.push(row(i.title, `Request from ${i.user.login}, waiting for you.`, pill('Waiting', 'wait'), btn('Review', i.html_url)));
+    }
+    const commits = await (await fetch(`https://api.github.com/repos/${REPO}/commits?per_page=8`)).json();
+    fill('history', commits.map((c) => row(c.commit.message.split('\n')[0], new Date(c.commit.author.date).toLocaleString(), null, btn('See change', c.html_url))), 'No changes yet.');
+  } catch {
+    fill('history', [], 'Recent changes could not be loaded right now.');
+  }
+  document.getElementById('attention').hidden = attention.length === 0;
+  fill('attention-list', attention, '');
+}
+
+main().catch((e) => {
+  const p = document.getElementById('loaded');
+  p.textContent = `The lists could not be loaded (${e.message}). Try reloading the page.`;
+  p.className = 'sub error';
+});
+extras();
+</script>
+</body>
+</html>

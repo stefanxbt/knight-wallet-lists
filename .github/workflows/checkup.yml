@@ -1,0 +1,45 @@
+# Every Monday the robot checks the lists and opens one "Weekly check-up" issue
+# with anything that needs attention (broken or scam links, banners that ended,
+# requests waiting for approval). GitHub emails it to the owner. The previous
+# check-up issue is closed so only the latest one is open.
+name: Weekly check-up
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  checkup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Find requests waiting for approval
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue list --repo "$GITHUB_REPOSITORY" --state open --limit 100 --json number,title,author,labels,body \
+            --jq '[.[] | select((.labels | map(.name) | index("check-up")) | not) | select(.body | contains("### Action")) | {number, title, author: .author.login}]' \
+            > "$RUNNER_TEMP/open.json"
+
+      - name: Check the lists
+        run: node --no-warnings scripts/checkup.mjs "$RUNNER_TEMP/open.json" > "$RUNNER_TEMP/report.md"
+
+      - name: Post the check-up
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create check-up --repo "$GITHUB_REPOSITORY" --color 0e8a16 --description "Weekly check-up from the robot" 2>/dev/null || true
+          for n in $(gh issue list --repo "$GITHUB_REPOSITORY" --label check-up --state open --json number --jq '.[].number'); do
+            gh issue close "$n" --repo "$GITHUB_REPOSITORY" --reason completed --comment "A newer check-up is out."
+          done
+          gh issue create --repo "$GITHUB_REPOSITORY" --label check-up \
+            --title "Weekly check-up $(date -u +%Y-%m-%d)" --body-file "$RUNNER_TEMP/report.md"

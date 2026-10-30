@@ -12,6 +12,7 @@ body:
     validations:
       required: true
   - type: dropdown
+    id: what-is-it
     attributes:
       label: What is it?
       options:
@@ -21,6 +22,7 @@ body:
     validations:
       required: true
   - type: dropdown
+    id: network
     attributes:
       label: Network
       description: Pick any for a website, it is not used.
@@ -34,12 +36,14 @@ body:
     validations:
       required: true
   - type: input
+    id: contract-address-or-website
     attributes:
       label: Contract address or website
       description: For a token or NFT, the contract address. For a website, just the address, for example scam-site.com.
     validations:
       required: true
   - type: input
+    id: why-is-it-a-scam
     attributes:
       label: Why is it a scam?
       description: Shown to users as the warning, so keep it short and plain.

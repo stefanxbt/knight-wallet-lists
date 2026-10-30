@@ -12,6 +12,7 @@ body:
     validations:
       required: true
   - type: input
+    id: banner-title
     attributes:
       label: Banner title
     validations:
