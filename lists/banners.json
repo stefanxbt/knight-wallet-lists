@@ -2,12 +2,44 @@
   "version": 1,
   "banners": [
     {
+      "id": "demo-knightfi",
+      "title": "Meet KnightFi",
+      "text": "DeFi on BlackFort, right inside your wallet. Open it from Explore.",
+      "link": "https://knightfi.io",
+      "placement": "home",
+      "active": true
+    },
+    {
+      "id": "demo-blackfort",
+      "title": "BXN at a glance",
+      "text": "Follow blocks, wallets and transfers on BlackFortScan.",
+      "link": "https://blackfortscan.com",
+      "placement": "home",
+      "active": true
+    },
+    {
+      "id": "demo-explore",
+      "title": "New: KnightFi",
+      "text": "Connect your Knight Wallet to KnightFi in one tap.",
+      "link": "https://knightfi.io",
+      "placement": "explore",
+      "active": true
+    },
+    {
+      "id": "demo-swap",
+      "title": "Swaps are almost here",
+      "text": "Swapping opens after the security audit. Prices and routes already work.",
+      "link": "https://knightfi.io",
+      "placement": "swap",
+      "active": true
+    },
+    {
       "id": "sample-welcome",
       "title": "Banners are live",
       "text": "This is a sample banner. Switch it off or add your own with the banner forms.",
       "link": "https://github.com/stefanxbt/knight-wallet-lists",
       "placement": "home",
-      "active": true
+      "active": false
     }
   ]
 }

@@ -2,6 +2,17 @@
   "version": 1,
   "dapps": [
     {
+      "id": "knightfi",
+      "name": "KnightFi",
+      "url": "https://knightfi.io",
+      "description": "DeFi on BlackFort, made by the Knight team.",
+      "category": "other",
+      "chains": [
+        "blackfort"
+      ],
+      "featured": true
+    },
+    {
       "id": "uniswap",
       "name": "Uniswap",
       "url": "https://app.uniswap.org",

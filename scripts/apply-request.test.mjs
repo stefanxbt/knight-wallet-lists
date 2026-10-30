@@ -96,7 +96,7 @@ describe('apply', async () => {
       const { params } = JSON.parse(init.body);
       return new Response(JSON.stringify({ jsonrpc: '2.0', id: 1, result: answers[params[0].data] }));
     });
-    const address = '0x6982508145454Ce325dDbE47a25d4ec3d2311933';
+    const address = '0x1111111111111111111111111111111111111111';
     const r = await apply(form({ Action: 'Add a token', Network: 'Ethereum', 'Contract address': address, Symbol: '_No response_', 'Token name': '_No response_', Decimals: '6' }));
     expect(read('tokens.json').tokens.at(-1)).toEqual({ chain: 'ethereum', address, symbol: 'PEPE', name: 'Pepe', decimals: 18 });
     expect(r.summary).toMatch(/You typed 6 decimals, but the token itself says 18/);
