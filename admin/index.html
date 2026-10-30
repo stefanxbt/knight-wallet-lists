@@ -217,7 +217,8 @@ async function main() {
 
   fill('banners', banners.banners.map((b) => {
     const [text, cls] = liveState(b);
-    return row(b.title, el('p', {}, `${b.text} `, el('span', { class: 'mono', text: `${PLACE[b.placement]} · ${b.link}` })), pill(text, cls),
+    const where = b.action ? `opens ${b.action} in the app` : b.link;
+    return row(b.title, el('p', {}, `${b.text} `, el('span', { class: 'mono', text: `${PLACE[b.placement]} · ${b.colour ?? 'random colour'} · ${where}` })), pill(text, cls),
       btn(b.active ? 'Switch off' : 'Switch on', form('8-switch-banner.yml', { 'banner-title': b.title, switch: b.active ? 'Off' : 'On' })),
       btn('Remove', form('9-remove-banner.yml', { 'banner-title': b.title }), 'danger'));
   }), 'No banners yet.');

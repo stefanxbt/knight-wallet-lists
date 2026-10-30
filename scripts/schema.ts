@@ -253,7 +253,16 @@ export type Banner = {
   // First and last day it shows, in UTC (both included).
   start?: string;
   end?: string;
+  // Colour style. Left out: the app picks one at random each time it opens.
+  colour?: BannerColour;
+  // Opens a screen in the app instead of `link`. Older app versions open `link`.
+  action?: BannerAction;
 };
+
+export const BANNER_COLOURS = ['aurora', 'ember', 'violet', 'ocean', 'mint', 'gold'] as const;
+export type BannerColour = (typeof BANNER_COLOURS)[number];
+export const BANNER_ACTIONS = ['invite', 'receive', 'request', 'friends', 'swap'] as const;
+export type BannerAction = (typeof BANNER_ACTIONS)[number];
 
 export type BannerList = { version: 1; banners: Banner[] };
 
@@ -276,6 +285,10 @@ export function parseBannerList(input: unknown): BannerList {
     const start = b.start === undefined ? undefined : date(b.start, `${at}.start`);
     const end = b.end === undefined ? undefined : date(b.end, `${at}.end`);
     if (start && end && end < start) fail(`${at} ends before it starts`);
+    const colour = b.colour as BannerColour | undefined;
+    if (colour !== undefined && !BANNER_COLOURS.includes(colour)) fail(`${at}.colour must be one of ${BANNER_COLOURS.join(', ')}`);
+    const action = b.action as BannerAction | undefined;
+    if (action !== undefined && !BANNER_ACTIONS.includes(action)) fail(`${at}.action must be one of ${BANNER_ACTIONS.join(', ')}`);
     return {
       id,
       title: text(b.title, `${at}.title`, 40),
@@ -286,6 +299,8 @@ export function parseBannerList(input: unknown): BannerList {
       ...(b.image !== undefined ? { image: String(b.image) } : {}),
       ...(start ? { start } : {}),
       ...(end ? { end } : {}),
+      ...(colour ? { colour } : {}),
+      ...(action ? { action } : {}),
     };
   });
   unique(banners, (b) => b.id, 'Banner');
