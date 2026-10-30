@@ -75,12 +75,6 @@ jobs:
           # Used only to download a banner picture dropped into the form.
           GITHUB_TOKEN: ${{ github.token }}
 
-      - name: Sign the lists
-        if: steps.role.outputs.allowed == 'true'
-        run: node --no-warnings scripts/sign-lists.mjs
-        env:
-          LISTS_SIGNING_KEY: ${{ secrets.LISTS_SIGNING_KEY }}
-
       - name: Save to main
         if: steps.role.outputs.allowed == 'true'
         run: |
