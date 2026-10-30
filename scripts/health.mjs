@@ -33,7 +33,6 @@ export const SERVICES = [
   ['prices', 'Exchange rates (open.er-api.com)', 'Showing values in EUR, AED, KES…', { url: 'https://open.er-api.com/v6/latest/USD', ok: (b) => b.result === 'success' && b.rates?.EUR > 0 }],
   ['apps', 'LI.FI', 'Swap quotes', { url: 'https://li.quest/v1/chains', ok: (b) => Array.isArray(b.chains) && b.chains.length > 0, show: (b) => `${b.chains.length} chains` }],
   ['apps', 'WalletConnect relay (Reown)', 'Connecting to dApps', { url: 'https://relay.walletconnect.org/health', text: true, ok: () => true }],
-  ['apps', 'Solana names (Bonfida)', 'Sending to .sol names', { url: 'https://sns-sdk-proxy.bonfida.workers.dev/resolve/bonfida', ok: (b) => typeof b.result === 'string' }],
   ['knight', 'Instant alerts helper', 'Phone alerts for incoming money', { url: 'https://knight-push.stefanxbt.workers.dev', text: true, ok: (t) => t.includes('Knight push helper') }],
   ['knight', 'Live lists', 'Banners, dApps, tokens, scam list in the app', { url: 'https://raw.githubusercontent.com/stefanxbt/knight-wallet-lists/main/lists/app-config.json', ok: (b) => b.version === 1 }],
   ['knight', 'Scam website list', 'Warning before scam sites', { url: 'https://github.com/stefanxbt/knight-wallet-lists/releases/download/scam-sites/meta.json', ok: (b) => typeof b === 'object' && b !== null }],
