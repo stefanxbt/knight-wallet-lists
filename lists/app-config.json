@@ -1,5 +1,13 @@
 {
   "version": 1,
-  "notices": [],
+  "notices": [
+    {
+      "id": "beware-of-fake-support-please",
+      "title": "Beware of fake support please!!",
+      "text": "Beware of fake support please!! we dont call you and ask for your phrases",
+      "level": "info",
+      "active": true
+    }
+  ],
   "switchedOff": []
 }
