@@ -1,0 +1,6 @@
+{
+  "_help": "Who may change the wallet lists. Put GitHub usernames in the lists below. admin: everything. support: banners, messages, dApps and the scam blocklist. view: listed on the admin page as team members, cannot change anything. The owner of this repository is always an admin. Only admins can edit this file.",
+  "admin": ["stefanxbt"],
+  "support": [],
+  "view": []
+}

@@ -1,9 +1,10 @@
 # Admin for the app's public lists (dApps, tokens, scam blocklist, banners) in /lists.
 #
-# How it works: fill in one of the forms under Issues > New issue. If the repo
-# owner (or a collaborator) sent it, this workflow applies it to the list, saves
-# it to main, replies on the issue and closes it. Requests from anyone else stay
-# open until the owner adds the "approved" label. The app downloads the lists
+# How it works: fill in one of the forms under Issues > New issue. If the sender's
+# role in team/roles.json allows that change (admin: everything; support: banners,
+# messages, dApps, scam blocklist), this workflow applies it to the list, saves it
+# to main, replies on the issue and closes it. Other requests stay open until
+# someone allowed adds the "approved" label. The app downloads the lists
 # from main, so the change reaches phones without a new app build.
 
 name: Wallet lists
@@ -40,8 +41,7 @@ jobs:
       github.event_name == 'issues' &&
       github.event.issue.state == 'open' &&
       contains(github.event.issue.body, '### Action') &&
-      ((github.event.action == 'opened' && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association)) ||
-       (github.event.action == 'labeled' && github.event.label.name == 'approved'))
+      (github.event.action == 'opened' || github.event.label.name == 'approved')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -51,7 +51,24 @@ jobs:
         with:
           node-version: 22
 
+      # team/roles.json on main decides; on "approved" it checks who added the label.
+      - name: Check the sender's role
+        id: role
+        run: node --no-warnings scripts/roles.mjs "$GITHUB_EVENT_PATH" "$RUNNER_TEMP/out" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for someone allowed
+        if: steps.role.outputs.allowed != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number }}
+          LABELED: ${{ github.event.action == 'labeled' }}
+        run: |
+          gh label create approved --repo "$GITHUB_REPOSITORY" --color 2ea44f --description "Apply this list change" 2>/dev/null || true
+          if [ "$LABELED" = true ]; then gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --remove-label approved; fi
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/out/wait.md"
+
       - name: Apply the request
+        if: steps.role.outputs.allowed == 'true'
         id: apply
         run: node --no-warnings scripts/apply-request.mjs "$GITHUB_EVENT_PATH" "$RUNNER_TEMP/out"
         env:
@@ -59,6 +76,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: Save to main
+        if: steps.role.outputs.allowed == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -70,6 +88,7 @@ jobs:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
 
       - name: Reply and close
+        if: steps.role.outputs.allowed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ github.event.issue.number }}
@@ -78,7 +97,7 @@ jobs:
           gh issue close "$ISSUE" --repo "$GITHUB_REPOSITORY" --reason completed
 
       - name: Explain what went wrong
-        if: failure()
+        if: failure() && steps.role.outputs.allowed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ github.event.issue.number }}
@@ -87,20 +106,3 @@ jobs:
             echo "❌ Something went wrong while saving this change, so nothing was changed. Please try again in a few minutes." > "$RUNNER_TEMP/out/message.md"
           fi
           gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/out/message.md"
-
-  # Someone who is not the owner sent a request, for example a user reporting a scam.
-  needs-approval:
-    if: >-
-      github.event_name == 'issues' &&
-      github.event.action == 'opened' &&
-      contains(github.event.issue.body, '### Action') &&
-      !contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Thank them and wait for the owner
-        env:
-          GH_TOKEN: ${{ github.token }}
-          ISSUE: ${{ github.event.issue.number }}
-        run: |
-          gh label create approved --repo "$GITHUB_REPOSITORY" --color 2ea44f --description "Apply this list change" 2>/dev/null || true
-          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Thanks for the report. The Knight Wallet team will check it. Once they add the **approved** label, the change is made automatically."

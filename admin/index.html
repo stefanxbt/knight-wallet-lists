@@ -136,6 +136,12 @@ details summary { cursor: pointer; color: var(--blue); font-size: 14px; }
   </section>
 
   <section>
+    <div class="head"><h2>Team</h2><a class="btn" href="https://github.com/stefanxbt/knight-wallet-lists/edit/main/team/roles.json">Edit team</a></div>
+    <p class="note">Admin: every change. Support: banners, messages, dApps and the scam blocklist. View: can look, cannot change anything. Anyone else's request waits for approval. Only admins can edit the team.</p>
+    <ul id="team"></ul>
+  </section>
+
+  <section>
     <div class="head"><h2>Recent changes</h2><a class="btn" href="https://github.com/stefanxbt/knight-wallet-lists/commits/main">All changes</a></div>
     <ul id="history"></ul>
   </section>
@@ -336,6 +342,20 @@ async function testApp() {
   } catch {}
 }
 testApp();
+
+// Who may change what (team/roles.json, checked by the robot on every request).
+async function team() {
+  const ROLE_PILL = { admin: ['Admin', 'on'], support: ['Support', 'wait'], view: ['View', 'off'] };
+  try {
+    const r = await fetch(`../team/roles.json?t=${Date.now()}`, { cache: 'no-store' });
+    const roles = await r.json();
+    fill('team', Object.entries(ROLE_PILL).flatMap(([role, [text, cls]]) =>
+      (roles[role] ?? []).map((login) => row(login, el('a', { href: `https://github.com/${login}`, text: `github.com/${login}` }), pill(text, cls)))), 'Nobody added yet.');
+  } catch {
+    fill('team', [], 'The team list could not be loaded.');
+  }
+}
+team();
 
 const lists = main().catch((e) => {
   const p = document.getElementById('loaded');
