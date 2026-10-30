@@ -166,6 +166,8 @@ describe('banners', () => {
 
 describe('app settings', () => {
   const config = () => read('app-config.json');
+  // The real list may already hold messages, so look this one up by its id.
+  const message = (id) => config().notices.find((n) => n.id === id);
 
   it('sends a message, switches it off and deletes it', async () => {
     const r = await apply(form({
@@ -174,11 +176,11 @@ describe('app settings', () => {
       'Last day': '_No response_', 'Switch on': '- [X] Yes, show it now',
     }));
     expect(r.summary).toMatch(/Fake support \| critical \| 🟢 showing/);
-    expect(config().notices[0]).toEqual({ id: 'fake-support', title: 'Fake support', text: 'We never ask for your phrase.', level: 'critical', active: true });
+    expect(message('fake-support')).toEqual({ id: 'fake-support', title: 'Fake support', text: 'We never ask for your phrase.', level: 'critical', active: true });
     await apply(form({ Action: 'Switch a message', 'Message title': 'fake support', Switch: 'Off' }));
-    expect(config().notices[0].active).toBe(false);
+    expect(message('fake-support').active).toBe(false);
     await apply(form({ Action: 'Switch a message', 'Message title': 'Fake support', Switch: 'Delete' }));
-    expect(config().notices).toEqual([]);
+    expect(message('fake-support')).toBe(undefined);
   });
 
   it('switches features off and back on', async () => {
