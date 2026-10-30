@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Lists Signing Key</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&family=Geist+Mono&display=swap">
+<style>
+:root { --bg:#000; --fg:#F5F6F8; --muted:#8A919D; --blue:#5B9DFF; --green:#3EE0A1; --red:#FF8A80; --glass:rgba(255,255,255,0.05); --line:rgba(255,255,255,0.09); color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.55 'Geist', system-ui, sans-serif; padding:24px max(16px, env(safe-area-inset-left, 0px)) 64px; }
+main { max-width:640px; margin:0 auto; display:grid; gap:16px; }
+h1 { font-size:24px; margin:0; letter-spacing:-0.02em; }
+section { background:var(--glass); border:0.5px solid var(--line); border-radius:18px; padding:18px; display:grid; gap:10px; }
+ol { margin:0; padding-left:20px; display:grid; gap:8px; }
+.btn { display:inline-flex; justify-content:center; min-height:44px; align-items:center; padding:0 18px; border-radius:99px; border:0; font:600 15px 'Geist', sans-serif; background:#fff; color:#000; cursor:pointer; text-decoration:none; }
+.btn.ghost { background:rgba(255,255,255,0.08); color:var(--fg); }
+code { display:block; font:14px 'Geist Mono', monospace; background:rgba(255,255,255,0.06); border-radius:10px; padding:12px; overflow-wrap:anywhere; user-select:all; }
+.note { color:var(--muted); font-size:13.5px; margin:0; }
+.warn { color:var(--red); }
+a { color:var(--blue); }
+[hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Lists signing key</h1>
+  <p class="note">The app only trusts banners, dApps, tokens, the scam list and the emergency switches when they are signed with this key. The key is made here in your browser and is never sent anywhere.</p>
+
+  <section>
+    <button class="btn" id="make">Create the key</button>
+    <p class="note warn" id="unsupported" hidden>This browser can't make the key. Please open this page in a recent Chrome or Safari.</p>
+  </section>
+
+  <section id="out" hidden>
+    <ol>
+      <li>Tap <b>Copy key</b>.<br><code id="secret"></code><button class="btn ghost" id="copy">Copy key</button></li>
+      <li>Open <a href="https://github.com/stefanxbt/knight-wallet-lists/settings/secrets/actions/new" target="_blank" rel="noopener">New secret on GitHub</a>.</li>
+      <li>In <b>Name</b> type <b>LISTS_SIGNING_KEY</b>. In <b>Secret</b> paste the key. Tap <b>Add secret</b>.</li>
+      <li>Close this page. Don't save the key anywhere else and never send it in a chat.</li>
+      <li>Tell Claude "signing key added". Claude finds the public half by itself.</li>
+    </ol>
+  </section>
+</main>
+<script>
+const hex = (buf) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+document.getElementById('make').onclick = async () => {
+  try {
+    const pair = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+    const pkcs8 = await crypto.subtle.exportKey('pkcs8', pair.privateKey);
+    document.getElementById('secret').textContent = hex(pkcs8).slice(-64);
+    document.getElementById('out').hidden = false;
+    document.getElementById('make').hidden = true;
+  } catch {
+    document.getElementById('unsupported').hidden = false;
+  }
+};
+document.getElementById('copy').onclick = async (e) => {
+  try { await navigator.clipboard.writeText(document.getElementById('secret').textContent); e.target.textContent = 'Copied'; } catch {}
+};
+</script>
+</body>
+</html>
