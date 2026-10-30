@@ -93,6 +93,11 @@ details summary { cursor: pointer; color: var(--blue); font-size: 14px; }
   </section>
 
   <section>
+    <div class="head"><h2>Test app</h2><a class="btn primary" id="apk-link" href="https://github.com/stefanxbt/non-custody-wallet/releases/tag/android-test">Download latest APK</a></div>
+    <p class="note" id="apk-note">The newest Android test app, built from the app code on GitHub.</p>
+  </section>
+
+  <section>
     <div class="head"><h2>Services</h2><a class="btn" id="check-now">Check now</a></div>
     <p class="note" id="health-note">Loading the latest check…</p>
     <ul id="health"></ul>
@@ -313,6 +318,24 @@ async function health() {
     fill('health', [], '');
   }
 }
+
+// The latest Android test app. Once builds are also published here (needs the LISTS_TOKEN
+// secret in the app repo), this release has the APK; until then the link opens the app repo's
+// release page, which only signed-in team members can see.
+async function testApp() {
+  const note = document.getElementById('apk-note');
+  try {
+    const r = await fetch(`https://api.github.com/repos/${REPO}/releases/tags/android-test`, { cache: 'no-store' });
+    if (!r.ok) return;
+    const release = await r.json();
+    const apk = release.assets.find((a) => a.name.endsWith('.apk'));
+    if (!apk) return;
+    document.getElementById('apk-link').href = apk.browser_download_url;
+    const build = (release.body ?? '').match(/Build (\d+)/)?.[1];
+    note.textContent = `${build ? `Build ${build}, made` : 'Made'} ${ago(apk.updated_at)} (${new Date(apk.updated_at).toLocaleString()}). Tap the button on your phone to install it.`;
+  } catch {}
+}
+testApp();
 
 const lists = main().catch((e) => {
   const p = document.getElementById('loaded');
