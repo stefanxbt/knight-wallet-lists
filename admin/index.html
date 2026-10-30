@@ -94,7 +94,7 @@ details summary { cursor: pointer; color: var(--blue); font-size: 14px; }
 
   <section>
     <div class="head"><h2>Test app</h2><a class="btn primary" id="apk-link" href="https://github.com/stefanxbt/non-custody-wallet/releases/tag/android-test">Download latest APK</a></div>
-    <p class="note" id="apk-note">The newest Android test app, built from the app code on GitHub.</p>
+    <p class="note" id="apk-note">The newest Android test app. Its publish time shows here once test builds are published to this page (needs the LISTS_TOKEN secret).</p>
   </section>
 
   <section>
@@ -338,7 +338,8 @@ async function testApp() {
     if (!apk) return;
     document.getElementById('apk-link').href = apk.browser_download_url;
     const build = (release.body ?? '').match(/Build (\d+)/)?.[1];
-    note.textContent = `${build ? `Build ${build}, made` : 'Made'} ${ago(apk.updated_at)} (${new Date(apk.updated_at).toLocaleString()}). Tap the button on your phone to install it.`;
+    const when = new Date(apk.updated_at).toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    note.replaceChildren(`${build ? `Build ${build} · ` : ''}Published ${when} your time `, pill(ago(apk.updated_at), 'on'), ' Tap the button on your phone to install it.');
   } catch {}
 }
 testApp();
