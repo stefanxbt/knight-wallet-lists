@@ -14,6 +14,14 @@ repo every time it opens, so a change reaches phones without a new app build.
 Nothing about users is ever sent here. These are public lists that every phone
 downloads the same way, which keeps the wallet non-custodial.
 
+## Admin panel
+
+**[Open the admin panel](https://stefanxbt.github.io/knight-wallet-lists/admin/)**
+to see everything at a glance: which features are on, which banners and
+messages are showing, all dApps, tokens and blocked scams, and anything that
+needs you. Every button opens the right form already filled in, so you only
+press **Create**.
+
 ## How to make a change (no coding)
 
 Click one of these links, fill in the form and press **Create**. A robot makes
