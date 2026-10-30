@@ -31,8 +31,13 @@ const real = path.resolve(import.meta.dirname, '../lists');
 const read = (f) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
 
 beforeEach(() => {
-  for (const f of ['dapps.json', 'tokens.json', 'blocklist.json', 'banners.json']) fs.copyFileSync(path.join(real, f), path.join(dir, f));
+  for (const f of ['dapps.json', 'tokens.json', 'blocklist.json', 'app-config.json']) fs.copyFileSync(path.join(real, f), path.join(dir, f));
+  // Start from no banners, whatever the live list holds today.
+  fs.writeFileSync(path.join(dir, 'banners.json'), JSON.stringify({ version: 1, banners: [] }));
+  // No real network calls in tests.
+  vi.stubGlobal('fetch', async () => { throw new Error('offline'); });
 });
+afterEach(() => vi.unstubAllGlobals());
 afterAll(() => fs.rmSync(dir, { recursive: true, force: true }));
 
 // The same text GitHub puts in an issue made from a form.
@@ -81,6 +86,25 @@ describe('apply', async () => {
     expect(list.nfts[0]).toMatchObject({ chain: 'polygon', contract: SCAM });
     expect(list.domains[0]).toMatchObject({ domain: 'claim-usdt.com', reason: 'Drainer' });
     await expect(apply(form({ Action: 'Block a scam', 'What is it?': 'Website', Network: 'Tron', 'Contract address or website': 'claim-usdt.com', 'Why is it a scam?': 'x' }))).rejects.toThrow(/already/);
+  });
+
+  it('reads symbol, name and decimals from the network when left empty', async () => {
+    const word = (hex) => hex.padStart(64, '0');
+    const abiString = (text) => '0x' + word('20') + word(text.length.toString(16)) + Buffer.from(text).toString('hex').padEnd(64, '0');
+    const answers = { '0x95d89b41': abiString('PEPE'), '0x06fdde03': abiString('Pepe'), '0x313ce567': '0x' + word('12') };
+    vi.stubGlobal('fetch', async (_url, init) => {
+      const { params } = JSON.parse(init.body);
+      return new Response(JSON.stringify({ jsonrpc: '2.0', id: 1, result: answers[params[0].data] }));
+    });
+    const address = '0x6982508145454Ce325dDbE47a25d4ec3d2311933';
+    const r = await apply(form({ Action: 'Add a token', Network: 'Ethereum', 'Contract address': address, Symbol: '_No response_', 'Token name': '_No response_', Decimals: '6' }));
+    expect(read('tokens.json').tokens.at(-1)).toEqual({ chain: 'ethereum', address, symbol: 'PEPE', name: 'Pepe', decimals: 18 });
+    expect(r.summary).toMatch(/You typed 6 decimals, but the token itself says 18/);
+  });
+
+  it('asks for the details when the network can not be read', async () => {
+    const r = apply(form({ Action: 'Add a token', Network: 'Solana', 'Contract address': 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN', Symbol: '_No response_', 'Token name': '_No response_', Decimals: '_No response_' }));
+    await expect(r).rejects.toThrow(/could not read Symbol, Token name, Decimals/);
   });
 
   it('adds a token and checks the address for its network', async () => {
@@ -137,5 +161,40 @@ describe('banners', () => {
     await apply(form({ Action: 'Block a scam', 'What is it?': 'Website', Network: 'Tron', 'Contract address or website': 'bitget.com', 'Why is it a scam?': 'test' }));
     await expect(apply(add())).rejects.toThrow(/blocklist/);
     expect(read('banners.json').banners).toEqual([]);
+  });
+});
+
+describe('app settings', () => {
+  const config = () => read('app-config.json');
+
+  it('sends a message, switches it off and deletes it', async () => {
+    const r = await apply(form({
+      Action: 'Send a message', 'Message title': 'Fake support', 'Message text': 'We never ask\nfor your phrase.',
+      'How serious is it?': 'Critical (urgent, shown on top in red)', Link: '_No response_', 'First day': '_No response_',
+      'Last day': '_No response_', 'Switch on': '- [X] Yes, show it now',
+    }));
+    expect(r.summary).toMatch(/Fake support \| critical \| 🟢 showing/);
+    expect(config().notices[0]).toEqual({ id: 'fake-support', title: 'Fake support', text: 'We never ask for your phrase.', level: 'critical', active: true });
+    await apply(form({ Action: 'Switch a message', 'Message title': 'fake support', Switch: 'Off' }));
+    expect(config().notices[0].active).toBe(false);
+    await apply(form({ Action: 'Switch a message', 'Message title': 'Fake support', Switch: 'Delete' }));
+    expect(config().notices).toEqual([]);
+  });
+
+  it('switches features off and back on', async () => {
+    await apply(form({ Action: 'Emergency switch', Feature: 'Swaps', Switch: 'Off for everyone' }));
+    await apply(form({ Action: 'Emergency switch', Feature: 'Swaps', Switch: 'Off for everyone' }));
+    expect(config().switchedOff).toEqual(['swap']);
+    const r = await apply(form({ Action: 'Emergency switch', Feature: 'Swaps', Switch: 'Back on' }));
+    expect(config().switchedOff).toEqual([]);
+    expect(r.summary).toMatch(/Swaps is now \*\*back on\*\*/);
+  });
+
+  it('asks old versions to update, and stops asking', async () => {
+    await apply(form({ Action: 'Ask users to update', 'Lowest version that is still fine': '1.0.1', Message: 'Security fix.' }));
+    expect(config()).toMatchObject({ minVersion: '1.0.1', updateMessage: 'Security fix.' });
+    await expect(apply(form({ Action: 'Ask users to update', 'Lowest version that is still fine': 'v2', Message: '' }))).rejects.toThrow(/look like 1.0.1/);
+    await apply(form({ Action: 'Ask users to update', 'Lowest version that is still fine': '_No response_', Message: '_No response_' }));
+    expect(config().minVersion).toBe(undefined);
   });
 });

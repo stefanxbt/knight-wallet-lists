@@ -1,0 +1,60 @@
+name: Send a message to all users
+description: Show a message in the app to everyone, for example news or a warning about a scam going around.
+title: "Send a message to all users"
+body:
+  - type: dropdown
+    id: action
+    attributes:
+      label: Action
+      options:
+        - Send a message
+      default: 0
+    validations:
+      required: true
+  - type: input
+    id: message-title
+    attributes:
+      label: Message title
+      description: Short, up to 60 letters. You also use it to switch the message off later.
+      placeholder: Beware of fake support accounts
+    validations:
+      required: true
+  - type: textarea
+    id: message-text
+    attributes:
+      label: Message text
+      description: Up to 300 letters. Plain words work best.
+      placeholder: Knight Wallet will never ask for your secret phrase. Anyone who asks is a scammer.
+    validations:
+      required: true
+  - type: dropdown
+    id: how-serious
+    attributes:
+      label: How serious is it?
+      options:
+        - Info (news or a tip)
+        - Warning (users should be careful)
+        - Critical (urgent, shown on top in red)
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: Link
+      description: Optional. A page with more details. Must start with https://.
+  - type: input
+    id: first-day
+    attributes:
+      label: First day
+      description: Optional. Like 2026-11-01. Leave it empty to start right away.
+  - type: input
+    id: last-day
+    attributes:
+      label: Last day
+      description: Optional. Like 2026-11-30. Leave it empty to keep it until you switch it off.
+  - type: checkboxes
+    id: switch-on
+    attributes:
+      label: Switch on
+      options:
+        - label: Yes, show it now

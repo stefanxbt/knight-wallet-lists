@@ -1,5 +1,5 @@
 name: Add a token
-description: Show a token in everyone's wallet.
+description: Show a token in everyone's wallet. Usually you only need the network and the contract address.
 title: "Add a token"
 body:
   - type: dropdown
@@ -12,6 +12,7 @@ body:
     validations:
       required: true
   - type: dropdown
+    id: network
     attributes:
       label: Network
       options:
@@ -24,6 +25,7 @@ body:
     validations:
       required: true
   - type: input
+    id: contract-address
     attributes:
       label: Contract address
       description: Copy it from the token's official website or from CoinGecko (the "Contract" row).
@@ -31,25 +33,25 @@ body:
     validations:
       required: true
   - type: input
+    id: symbol
     attributes:
       label: Symbol
+      description: Optional. Leave it empty and the robot reads it from the network.
       placeholder: USDT
-    validations:
-      required: true
   - type: input
+    id: token-name
     attributes:
       label: Token name
+      description: Optional. Leave it empty and the robot reads it from the network.
       placeholder: Tether USD
-    validations:
-      required: true
   - type: input
+    id: decimals
     attributes:
       label: Decimals
-      description: Shown on CoinGecko or the block explorer page of the token. Usually 6 or 18.
+      description: Optional. Leave it empty and the robot reads it from the network.
       placeholder: "18"
-    validations:
-      required: true
   - type: input
+    id: coingecko-id
     attributes:
       label: CoinGecko ID
       description: Optional, for the price. It is the last part of the token's CoinGecko address, for example "tether" in coingecko.com/en/coins/tether.

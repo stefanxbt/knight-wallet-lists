@@ -17,12 +17,15 @@ import {
   isValidAddress,
   normalizeDappUrl,
   normalizeDomain,
+  parseAppConfig,
   parseBannerList,
+  isNoticeLive,
   parseBlocklist,
   parseDappList,
   parseTokenList,
   slugify,
 } from './schema.ts';
+import { readTokenInfo } from './onchain.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const LISTS = process.env.LISTS_DIR ?? path.join(ROOT, 'lists');
@@ -134,12 +137,10 @@ function removeDapp(fields) {
   return { summary: `Removed the dApp **${match.name}**.`, commit: `Remove dApp ${match.name}` };
 }
 
-function addToken(fields) {
+async function addToken(fields) {
   const list = parseTokenList(read('tokens.json'));
   const chain = network(fields);
   const address = contract(fields, chain, 'Contract address');
-  const decimals = Number(field(fields, 'Decimals'));
-  if (!Number.isInteger(decimals)) fail('Decimals must be a whole number, for example 6 or 18.');
   const blocked = parseBlocklist(read('blocklist.json'));
   if (blocked.tokens.some((t) => addressKey(t.chain, t.address) === addressKey(chain, address))) {
     fail('This token is on the scam blocklist. Unblock it first if that was a mistake.');
@@ -147,11 +148,33 @@ function addToken(fields) {
   if (list.tokens.some((t) => addressKey(t.chain, t.address) === addressKey(chain, address))) {
     fail('This token is already on the list.');
   }
+
+  // What the network says wins for decimals, because wrong decimals show wrong balances.
+  const onchain = await readTokenInfo(chain, address);
+  const typedDecimals = field(fields, 'Decimals', { optional: true });
+  if (typedDecimals && !/^\d{1,2}$/.test(typedDecimals)) fail('Decimals must be a whole number, for example 6 or 18.');
+  const decimals = onchain.decimals ?? (typedDecimals ? Number(typedDecimals) : undefined);
+  const symbol = (field(fields, 'Symbol', { optional: true }) || onchain.symbol || '').toUpperCase();
+  const name = field(fields, 'Token name', { optional: true }) || onchain.name || '';
+  const missing = [!symbol && 'Symbol', !name && 'Token name', decimals === undefined && 'Decimals'].filter(Boolean);
+  if (missing.length) {
+    fail(`I could not read ${missing.join(', ')} from the network. Please fill ${missing.length > 1 ? 'them' : 'it'} in. Is the address really a token on ${chain}?`);
+  }
+  const notes = [];
+  if (typedDecimals && onchain.decimals !== undefined && Number(typedDecimals) !== onchain.decimals) {
+    notes.push(`You typed ${typedDecimals} decimals, but the token itself says ${onchain.decimals}, so I used ${onchain.decimals}.`);
+  }
+  if (onchain.symbol && symbol !== onchain.symbol.toUpperCase()) {
+    notes.push(`⚠️ The token calls itself **${onchain.symbol}**, not ${symbol}. Double-check you have the right address.`);
+  }
+
   const priceId = field(fields, 'CoinGecko ID', { optional: true });
-  const symbol = field(fields, 'Symbol').toUpperCase();
-  list.tokens.push({ chain, address, symbol, name: field(fields, 'Token name'), decimals, ...(priceId ? { priceId } : {}) });
+  list.tokens.push({ chain, address, symbol, name, decimals, ...(priceId ? { priceId } : {}) });
   write('tokens.json', parseTokenList(list));
-  return { summary: `Added the token **${symbol}** on ${chain} (\`${address}\`).`, commit: `Add token ${symbol} on ${chain}` };
+  return {
+    summary: [`Added the token **${symbol}** (${name}, ${decimals} decimals) on ${chain} (\`${address}\`).`, ...notes].join('\n\n'),
+    commit: `Add token ${symbol} on ${chain}`,
+  };
 }
 
 function removeToken(fields) {
@@ -312,7 +335,11 @@ async function addBanner(fields) {
   });
   write('banners.json', parseBannerList(list));
   return {
-    summary: `Added the banner **${title}** (${active ? 'switched on' : 'switched off'}).\n\n${bannerStatus(list)}`,
+    summary: [
+      `Added the banner **${title}** (${active ? 'switched on' : 'switched off'}).`,
+      image ? `Preview:\n\n![${title}](https://raw.githubusercontent.com/${process.env.GITHUB_REPOSITORY ?? 'stefanxbt/knight-wallet-lists'}/main/lists/banners/${image})` : '',
+      bannerStatus(list),
+    ].filter(Boolean).join('\n\n'),
     commit: `Add banner ${title}`,
   };
 }
@@ -338,6 +365,98 @@ function removeBanner(fields) {
   return { summary: `Removed the banner **${banner.title}**.\n\n${bannerStatus(list)}`, commit: `Remove banner ${banner.title}` };
 }
 
+const LEVELS = { Info: 'info', Warning: 'warning', Critical: 'critical' };
+const FEATURES = { Swaps: 'swap', WalletConnect: 'walletconnect', 'dApp browser': 'dappBrowser', Sending: 'send' };
+
+function configStatus(config, now = new Date()) {
+  const lines = [];
+  lines.push(config.switchedOff.length
+    ? `**Switched off for everyone:** ${config.switchedOff.map((f) => Object.keys(FEATURES).find((k) => FEATURES[k] === f)).join(', ')}`
+    : '**Switched off for everyone:** nothing');
+  lines.push(config.minVersion ? `**Asking to update:** everyone below ${config.minVersion}` : '**Asking to update:** no');
+  if (config.notices.length) {
+    lines.push('', '| Message | How serious | Status |', '| --- | --- | --- |');
+    for (const n of config.notices) {
+      const state = isNoticeLive(n, now) ? '🟢 showing' : n.active ? '🟡 on, but outside its dates' : '⚪ off';
+      lines.push(`| ${n.title} | ${n.level} | ${state} |`);
+    }
+  } else {
+    lines.push('**Messages:** none');
+  }
+  return lines.join('\n');
+}
+
+function sendMessage(fields) {
+  const config = parseAppConfig(read('app-config.json'));
+  const title = field(fields, 'Message title');
+  const levelLabel = field(fields, 'How serious is it?').split(' ')[0];
+  const level = LEVELS[levelLabel];
+  if (!level) fail('Pick how serious the message is.');
+  let link;
+  const linkText = field(fields, 'Link', { optional: true });
+  if (linkText) {
+    link = normalizeDappUrl(linkText);
+    if (!link) fail('The link must start with https:// and be a normal website address.');
+    bannerBlocklistCheck(link);
+  }
+  const start = optionalDate(fields, 'First day');
+  const end = optionalDate(fields, 'Last day');
+  let id = slugify(title) || 'message';
+  while (config.notices.some((n) => n.id === id)) id = `${id}-2`;
+  const active = checked(fields['Switch on'] ?? '').length > 0;
+  config.notices.push({
+    id, title, text: field(fields, 'Message text').replace(/\s+/g, ' ').trim(), level, active,
+    ...(link ? { link } : {}), ...(start ? { start } : {}), ...(end ? { end } : {}),
+  });
+  write('app-config.json', parseAppConfig(config));
+  return { summary: `Added the message **${title}** (${active ? 'switched on' : 'switched off'}).\n\n${configStatus(config)}`, commit: `Add message ${title}` };
+}
+
+function switchMessage(fields) {
+  const config = parseAppConfig(read('app-config.json'));
+  const wanted = field(fields, 'Message title');
+  const notice = config.notices.find((n) => n.title.toLowerCase() === wanted.toLowerCase() || n.id === slugify(wanted));
+  if (!notice) fail(`No message called "${wanted}". The messages are: ${config.notices.map((n) => n.title).join(', ') || 'none'}.`);
+  const choice = field(fields, 'Switch');
+  if (choice === 'Delete') config.notices = config.notices.filter((n) => n !== notice);
+  else notice.active = choice === 'On';
+  write('app-config.json', parseAppConfig(config));
+  const done = choice === 'Delete' ? 'Deleted' : `Switched ${choice.toLowerCase()}`;
+  return { summary: `${done} the message **${notice.title}**.\n\n${configStatus(config)}`, commit: `${done} message ${notice.title}` };
+}
+
+function emergencySwitch(fields) {
+  const config = parseAppConfig(read('app-config.json'));
+  const label = field(fields, 'Feature');
+  const feature = FEATURES[label];
+  if (!feature) fail(`"${label}" is not a feature I can switch.`);
+  const off = field(fields, 'Switch') === 'Off for everyone';
+  config.switchedOff = off ? [...new Set([...config.switchedOff, feature])] : config.switchedOff.filter((f) => f !== feature);
+  write('app-config.json', parseAppConfig(config));
+  return {
+    summary: `${label} is now **${off ? 'off for everyone' : 'back on'}**.\n\n${configStatus(config)}`,
+    commit: `${off ? 'Switch off' : 'Switch back on'} ${label}`,
+  };
+}
+
+function askToUpdate(fields) {
+  const config = parseAppConfig(read('app-config.json'));
+  const min = field(fields, 'Lowest version that is still fine', { optional: true });
+  const message = field(fields, 'Message', { optional: true });
+  if (min && !/^\d+\.\d+\.\d+$/.test(min)) fail('The version must look like 1.0.1.');
+  delete config.minVersion;
+  delete config.updateMessage;
+  if (min) {
+    config.minVersion = min;
+    if (message) config.updateMessage = message.slice(0, 300);
+  }
+  write('app-config.json', parseAppConfig(config));
+  return {
+    summary: `${min ? `Everyone below version ${min} is now asked to update.` : 'Stopped asking users to update.'}\n\n${configStatus(config)}`,
+    commit: min ? `Ask versions below ${min} to update` : 'Stop asking users to update',
+  };
+}
+
 const ACTIONS = {
   'Add a dApp': addDapp,
   'Remove a dApp': removeDapp,
@@ -348,6 +467,10 @@ const ACTIONS = {
   'Add a banner': addBanner,
   'Switch a banner on or off': switchBanner,
   'Remove a banner': removeBanner,
+  'Send a message': sendMessage,
+  'Switch a message': switchMessage,
+  'Emergency switch': emergencySwitch,
+  'Ask users to update': askToUpdate,
 };
 
 export async function apply(body) {

@@ -1,0 +1,25 @@
+name: Ask users to update
+description: Ask everyone on an older app version to update, for example after an important fix.
+title: "Ask users to update"
+body:
+  - type: dropdown
+    id: action
+    attributes:
+      label: Action
+      options:
+        - Ask users to update
+      default: 0
+    validations:
+      required: true
+  - type: input
+    id: lowest-version
+    attributes:
+      label: Lowest version that is still fine
+      description: Users below this version are asked to update. Like 1.0.1. Leave it empty to stop asking.
+      placeholder: "1.0.1"
+  - type: input
+    id: update-message
+    attributes:
+      label: Message
+      description: Optional. Why they should update.
+      placeholder: This update fixes an important security problem.

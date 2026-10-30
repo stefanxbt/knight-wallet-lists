@@ -1,0 +1,34 @@
+name: Emergency switch
+description: Turn a feature off for everyone right away, for example if a partner service has problems. Turn it back on the same way.
+title: "Emergency switch"
+body:
+  - type: dropdown
+    id: action
+    attributes:
+      label: Action
+      options:
+        - Emergency switch
+      default: 0
+    validations:
+      required: true
+  - type: dropdown
+    id: feature
+    attributes:
+      label: Feature
+      options:
+        - Swaps
+        - WalletConnect
+        - dApp browser
+        - Sending
+    validations:
+      required: true
+  - type: dropdown
+    id: switch
+    attributes:
+      label: Switch
+      description: This can only turn things off and back on. It can never switch on something the app itself keeps off, like sending real money before the security audit.
+      options:
+        - Off for everyone
+        - Back on
+    validations:
+      required: true

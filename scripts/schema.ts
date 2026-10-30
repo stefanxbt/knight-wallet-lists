@@ -300,3 +300,99 @@ export function isBannerLive(banner: Banner, now: Date = new Date()): boolean {
   if (banner.end && today > banner.end) return false;
   return true;
 }
+
+// App settings the team can change without an app update: messages to every
+// user, an "please update" prompt, and emergency off switches. Switches can only
+// turn a feature off, never on, so a bad or tampered file can't enable anything
+// the app itself keeps disabled (for example sending on mainnet).
+export const FEATURE_SWITCHES = ['swap', 'walletconnect', 'dappBrowser', 'send'] as const;
+export type FeatureSwitch = (typeof FEATURE_SWITCHES)[number];
+
+export const NOTICE_LEVELS = ['info', 'warning', 'critical'] as const;
+export type NoticeLevel = (typeof NOTICE_LEVELS)[number];
+
+export type Notice = {
+  id: string;
+  title: string;
+  text: string;
+  level: NoticeLevel;
+  active: boolean;
+  link?: string;
+  start?: string;
+  end?: string;
+};
+
+export type AppConfig = {
+  version: 1;
+  notices: Notice[];
+  switchedOff: FeatureSwitch[];
+  // Versions below this are asked to update, for example after a security fix.
+  minVersion?: string;
+  updateMessage?: string;
+};
+
+const VERSION = /^\d+\.\d+\.\d+$/;
+
+// -1, 0 or 1, like a sort comparator. "1.10.0" is newer than "1.9.3".
+export function compareVersions(a: string, b: string): number {
+  const pa = a.split('.').map(Number);
+  const pb = b.split('.').map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((pa[i] ?? 0) !== (pb[i] ?? 0)) return (pa[i] ?? 0) < (pb[i] ?? 0) ? -1 : 1;
+  }
+  return 0;
+}
+
+export function parseAppConfig(input: unknown): AppConfig {
+  const root = object(input, 'app config');
+  version(root);
+  const notices = array(root.notices, 'notices').map((raw, i): Notice => {
+    const n = object(raw, `notices[${i}]`);
+    const at = `notices[${i}]`;
+    const id = text(n.id, `${at}.id`, 40);
+    if (slugify(id) !== id) fail(`${at}.id "${id}" may only use a-z, 0-9 and -`);
+    const level = n.level as NoticeLevel;
+    if (!NOTICE_LEVELS.includes(level)) fail(`${at}.level must be one of ${NOTICE_LEVELS.join(', ')}`);
+    if (typeof n.active !== 'boolean') fail(`${at}.active must be true or false`);
+    let link: string | undefined;
+    if (n.link !== undefined) {
+      link = text(n.link, `${at}.link`, 300);
+      if (normalizeDappUrl(link) !== link) fail(`${at}.link "${link}" must be a lowercase https address`);
+    }
+    const start = n.start === undefined ? undefined : date(n.start, `${at}.start`);
+    const end = n.end === undefined ? undefined : date(n.end, `${at}.end`);
+    if (start && end && end < start) fail(`${at} ends before it starts`);
+    return {
+      id,
+      title: text(n.title, `${at}.title`, 60),
+      text: text(n.text, `${at}.text`, 300),
+      level,
+      active: n.active,
+      ...(link ? { link } : {}),
+      ...(start ? { start } : {}),
+      ...(end ? { end } : {}),
+    };
+  });
+  unique(notices, (n) => n.id, 'Message');
+  const switchedOff = array(root.switchedOff, 'switchedOff') as FeatureSwitch[];
+  if (switchedOff.some((s) => !FEATURE_SWITCHES.includes(s))) {
+    fail(`switchedOff may only list ${FEATURE_SWITCHES.join(', ')}`);
+  }
+  unique(switchedOff, (s) => s, 'Switch');
+  let minVersion: string | undefined;
+  if (root.minVersion !== undefined) {
+    minVersion = text(root.minVersion, 'minVersion', 20);
+    if (!VERSION.test(minVersion)) fail('minVersion must look like 1.2.0');
+  }
+  return {
+    version: 1,
+    notices,
+    switchedOff,
+    ...(minVersion ? { minVersion } : {}),
+    ...(root.updateMessage !== undefined ? { updateMessage: text(root.updateMessage, 'updateMessage', 300) } : {}),
+  };
+}
+
+export function isNoticeLive(notice: Notice, now: Date = new Date()): boolean {
+  return isBannerLive({ ...notice, link: '', placement: 'home' }, now);
+}

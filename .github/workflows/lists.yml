@@ -33,7 +33,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node --no-warnings --test scripts/apply-request.test.mjs
+      - run: node --no-warnings --test scripts/*.test.mjs
 
   apply:
     if: >-
