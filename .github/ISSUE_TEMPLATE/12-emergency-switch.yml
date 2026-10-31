@@ -28,6 +28,7 @@ body:
         - Payment requests
         - Friends
         - Invite friends
+        - Ledger hardware wallet
     validations:
       required: true
   - type: dropdown

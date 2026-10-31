@@ -376,6 +376,11 @@ export type Notice = {
 
 export type AppConfig = {
   version: 1;
+  // When the team last changed these settings (UTC, set by scripts/sign-lists.mjs in the lists
+  // repo, inside the signed text). Phones refuse settings older than the newest they have seen,
+  // so an old signed copy can't be replayed to switch a hidden feature back on or bring back a
+  // removed tester.
+  issued?: string;
   notices: Notice[];
   switchedOff: FeatureSwitch[];
   // Show / testers only / hide per feature (see APP_FEATURES). Features not listed use their
@@ -401,6 +406,7 @@ export type AppConfig = {
 };
 
 const VERSION = /^\d+\.\d+\.\d+$/;
+const ISSUED = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/;
 
 // -1, 0 or 1, like a sort comparator. "1.10.0" is newer than "1.9.3".
 export function compareVersions(a: string, b: string): number {
@@ -458,6 +464,11 @@ export function parseAppConfig(input: unknown): AppConfig {
       if (!isAppFeature(key)) continue;
       features[key] = (FEATURE_STATES as readonly unknown[]).includes(value) ? (value as FeatureState) : 'off';
     }
+  }
+  let issued: string | undefined;
+  if (root.issued !== undefined) {
+    issued = text(root.issued, 'issued', 30);
+    if (!ISSUED.test(issued) || Number.isNaN(Date.parse(issued))) fail('issued must be a UTC time like 2026-10-31T20:45:00.000Z');
   }
   let minVersion: string | undefined;
   if (root.minVersion !== undefined) {
@@ -517,6 +528,7 @@ export function parseAppConfig(input: unknown): AppConfig {
   }
   return {
     version: 1,
+    ...(issued ? { issued } : {}),
     notices,
     switchedOff,
     ...(features && Object.keys(features).length ? { features } : {}),
@@ -548,4 +560,10 @@ export function featureState(config: AppConfig, feature: AppFeature): FeatureSta
 export function featureShown(config: AppConfig, feature: AppFeature, tester: boolean): boolean {
   const state = featureState(config, feature);
   return state === 'on' || (state === 'testers' && tester);
+}
+
+// When these settings were made, in milliseconds (0 when the file has no time, as before
+// rollback protection existed).
+export function configIssuedAt(config: AppConfig): number {
+  return config.issued ? Date.parse(config.issued) : 0;
 }

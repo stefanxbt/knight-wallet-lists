@@ -59,6 +59,7 @@ li:first-child { border-top: 0; }
 .on { background: rgba(62,224,161,0.14); color: var(--green); }
 .wait { background: rgba(255,184,77,0.12); color: var(--amber); }
 .off { background: rgba(255,255,255,0.07); color: var(--muted); }
+.tester { background: rgba(110,168,255,0.14); color: var(--blue); }
 .crit { background: rgba(255,138,128,0.14); color: var(--red); }
 .actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .btn { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font: 500 13.5px var(--sans); color: var(--fg); background: rgba(255,255,255,0.08); border: 0.5px solid var(--line); padding: 7px 12px; border-radius: 10px; }
@@ -210,7 +211,7 @@ function featureState(config, key, standard) {
   if ((config.switchedOff || []).includes(key)) return state === 'testers' ? 'testers' : 'off';
   return state || standard;
 }
-const STATE_LABEL = { on: ['On for everyone', 'on'], testers: ['Testers only', 'wait'], off: ['Hidden', 'crit'] };
+const STATE_LABEL = { on: ['On for everyone', 'on'], testers: ['Testers only', 'tester'], off: ['Hidden', 'off'] };
 const STATE_DETAIL = { on: 'Everyone sees it.', testers: 'Only the real-money tester wallets see it.', off: 'Hidden for everyone.' };
 const PLACE = { home: 'Home', explore: 'Explore', swap: 'Swap' };
 
