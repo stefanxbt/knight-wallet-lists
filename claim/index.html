@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>Money for you · Knight Wallet</title>
+<meta name="description" content="Someone sent you money with Knight Wallet. Get Knight and claim it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap">
+<!--
+  Send by link: the claim page. The one-time key is after "#" in the address, which browsers
+  never send to any server (GitHub never sees it). This page only reads the coin and amount to
+  show them, and passes the same "#…" part to the Knight app. It loads no scripts from anywhere.
+-->
+<style>
+  :root { color-scheme: dark; --bg: #000; --fg: #F5F6F8; --muted: #A3A9B4; --glass: rgba(255,255,255,0.06); --line: rgba(255,255,255,0.12); --green: #3EE0A1; --blue: #5B9DFF; --warn: #FFD08A; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--fg); font: 16px/1.5 Geist, system-ui, sans-serif; display: flex; justify-content: center; overflow-x: hidden; }
+  body::before { content: ""; position: fixed; inset: -20% -40% auto; height: 70vh; background: radial-gradient(closest-side, rgba(62,224,161,0.28), transparent), radial-gradient(closest-side at 80% 40%, rgba(91,157,255,0.25), transparent); pointer-events: none; }
+  main { position: relative; width: 100%; max-width: 480px; padding: 40px 16px 32px; display: flex; flex-direction: column; gap: 18px; }
+  .brand { font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-size: 13px; color: var(--muted); }
+  h1 { margin: 0; font-size: 40px; line-height: 1.1; letter-spacing: -0.03em; font-weight: 700; overflow-wrap: anywhere; }
+  h1 span { color: var(--green); }
+  p { margin: 0; color: #B3BAC6; }
+  .card { background: var(--glass); border: 1px solid var(--line); border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+  ol { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
+  a.button { display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 18px; font-weight: 600; text-decoration: none; font-size: 17px; }
+  .primary { background: var(--fg); color: #000; }
+  .glass { background: var(--glass); border: 1px solid var(--line); color: var(--fg); }
+  .warn { color: var(--warn); font-size: 14px; }
+  .small { font-size: 14px; color: var(--muted); }
+  .test { align-self: flex-start; display: inline-block; font-size: 13px; padding: 2px 10px; border-radius: 999px; background: rgba(255,186,90,0.15); color: #FFBA5A; }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">Knight Wallet</div>
+  <h1 id="title">Money for you</h1>
+  <p id="sub">Someone sent you crypto with Knight Wallet. It's waiting for you.</p>
+  <a class="button primary" id="open" href="knightwallet://claim">Open in Knight</a>
+  <div class="card">
+    <strong>No Knight yet?</strong>
+    <ol>
+      <li>Get Knight Wallet (Android test app for now).</li>
+      <li>Create your wallet. It takes a minute.</li>
+      <li>Come back to this message, tap the link again, then tap <b>Open in Knight</b>.</li>
+    </ol>
+    <a class="button glass" href="https://github.com/stefanxbt/knight-wallet-lists/releases/tag/android-test">Get Knight for Android</a>
+    <p class="small">iPhone: coming soon.</p>
+  </div>
+  <p class="warn">This link works like cash. Don't forward it. If nobody opens it in 7 days, the money goes back to the sender.</p>
+  <p class="small" id="bad" hidden>This link looks broken. Ask the sender to share it again.</p>
+</main>
+<script>
+  (function () {
+    var hash = location.hash.slice(1);
+    var q = {};
+    hash.split('&').forEach(function (p) { var i = p.indexOf('='); if (i > 0) { try { q[p.slice(0, i)] = decodeURIComponent(p.slice(i + 1)); } catch (e) {} } });
+    var coins = { 'tron-usdt': 'USDT', tron: 'TRX', bsc: 'BNB', ethereum: 'ETH', polygon: 'POL', solana: 'SOL', blackfort: 'BXN', hyperevm: 'HYPE' };
+    var ok = /^[0-9a-f]{32}$/i.test(q.k || '') && coins[q.a] && /^\d{1,12}(\.\d{1,18})?$/.test(q.v || '');
+    if (!ok) { document.getElementById('bad').hidden = false; document.getElementById('open').style.display = 'none'; return; }
+    var title = document.getElementById('title');
+    title.textContent = '';
+    var amt = document.createElement('span');
+    amt.textContent = q.v + ' ' + coins[q.a];
+    title.appendChild(amt);
+    title.appendChild(document.createTextNode(' for you'));
+    if (q.n === 't') { var t = document.createElement('span'); t.className = 'test'; t.textContent = 'Test network'; document.getElementById('sub').after(t); }
+    document.getElementById('open').href = 'knightwallet://claim#' + hash;
+    // Drop the key from the address bar and history once it is in the button.
+    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+  })();
+</script>
+</body>
+</html>
