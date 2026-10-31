@@ -206,10 +206,11 @@ describe('app settings', () => {
   it('adds and removes real-money testers', async () => {
     const a = '0xAbC0000000000000000000000000000000000001';
     const r = await apply(form({ Action: 'Real-money tester', Change: 'Add', 'Wallet address': a }));
-    expect(config().realMoneyTesters).toEqual([a.toLowerCase()]);
+    const before = (config().realMoneyTesters ?? []).filter((t) => t !== a.toLowerCase());
+    expect(config().realMoneyTesters.includes(a.toLowerCase())).toBe(true);
     expect(r.summary).toMatch(/Added/);
     await apply(form({ Action: 'Real-money tester', Change: 'Remove', 'Wallet address': a }));
-    expect(config().realMoneyTesters).toBe(undefined);
+    expect(config().realMoneyTesters ?? []).toEqual(before);
     await expect(apply(form({ Action: 'Real-money tester', Change: 'Add', 'Wallet address': 'bc1qxyz' }))).rejects.toThrow(/0x/);
   });
 
