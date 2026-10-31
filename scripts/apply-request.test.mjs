@@ -203,6 +203,16 @@ describe('app settings', () => {
     await expect(apply(form({ Action: 'Country rule', Feature: 'Swaps', Change: 'Switch off in these countries', Countries: 'USA' }))).rejects.toThrow(/two-letter/);
   });
 
+  it('adds and removes real-money testers', async () => {
+    const a = '0xAbC0000000000000000000000000000000000001';
+    const r = await apply(form({ Action: 'Real-money tester', Change: 'Add', 'Wallet address': a }));
+    expect(config().realMoneyTesters).toEqual([a.toLowerCase()]);
+    expect(r.summary).toMatch(/Added/);
+    await apply(form({ Action: 'Real-money tester', Change: 'Remove', 'Wallet address': a }));
+    expect(config().realMoneyTesters).toBe(undefined);
+    await expect(apply(form({ Action: 'Real-money tester', Change: 'Add', 'Wallet address': 'bc1qxyz' }))).rejects.toThrow(/0x/);
+  });
+
   it('asks old versions to update, and stops asking', async () => {
     await apply(form({ Action: 'Ask users to update', 'Lowest version that is still fine': '1.0.1', Message: 'Security fix.' }));
     expect(config()).toMatchObject({ minVersion: '1.0.1', updateMessage: 'Security fix.' });

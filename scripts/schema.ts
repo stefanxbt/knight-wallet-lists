@@ -354,6 +354,9 @@ export type AppConfig = {
   updateMessage?: string;
   // Country rules per feature. A feature without a rule is on everywhere.
   regions?: Partial<Record<RegionFeature, RegionRule>>;
+  // Wallets (Ethereum address, lowercase) allowed to switch on small real-money tests in the
+  // test app. Nobody else sees the switch, so a public test app can't move real money.
+  realMoneyTesters?: string[];
 };
 
 const VERSION = /^\d+\.\d+\.\d+$/;
@@ -423,11 +426,19 @@ export function parseAppConfig(input: unknown): AppConfig {
       regions[feature as RegionFeature] = { blocked: blocked.sort(), unknownOff: rule.unknownOff === true };
     }
   }
+  let realMoneyTesters: string[] | undefined;
+  if (root.realMoneyTesters !== undefined) {
+    realMoneyTesters = array(root.realMoneyTesters, 'realMoneyTesters').map((a) => String(a).toLowerCase());
+    if (realMoneyTesters.some((a) => !/^0x[0-9a-f]{40}$/.test(a))) fail('realMoneyTesters must be wallet addresses like 0x1234…');
+    if (realMoneyTesters.length > 50) fail('realMoneyTesters may list at most 50 wallets');
+    unique(realMoneyTesters, (a) => a, 'Tester');
+  }
   return {
     version: 1,
     notices,
     switchedOff,
     ...(regions ? { regions } : {}),
+    ...(realMoneyTesters?.length ? { realMoneyTesters } : {}),
     ...(minVersion ? { minVersion } : {}),
     ...(root.updateMessage !== undefined ? { updateMessage: text(root.updateMessage, 'updateMessage', 300) } : {}),
   };
