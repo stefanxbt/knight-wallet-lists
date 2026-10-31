@@ -189,7 +189,34 @@ describe('app settings', () => {
     expect(config().switchedOff).toEqual(['swap']);
     const r = await apply(form({ Action: 'Emergency switch', Feature: 'Swaps', Switch: 'Back on' }));
     expect(config().switchedOff).toEqual([]);
-    expect(r.summary).toMatch(/Swaps is now \*\*back on\*\*/);
+    expect(r.summary).toMatch(/Swaps is now \*\*on for everyone\*\*/);
+  });
+
+  it('shows a feature to testers only and hides it for everyone', async () => {
+    await apply(form({ Action: 'Emergency switch', Feature: 'Hyperliquid trading', Switch: 'Testers only' }));
+    expect(config().features.hyperliquid).toBe('testers');
+    expect(config().switchedOff).toEqual([]);
+    const r = await apply(form({ Action: 'Emergency switch', Feature: 'Friends', Switch: 'Off for everyone' }));
+    expect(config().features.friends).toBe('off');
+    expect(r.summary).toMatch(/Friends is now \*\*off for everyone\*\*/);
+    expect(r.summary).toMatch(/Hyperliquid trading \(testers only\)/);
+    // The older off list is kept for app versions from before "testers only".
+    await apply(form({ Action: 'Emergency switch', Feature: 'Sending', Switch: 'Testers only' }));
+    expect(config().switchedOff).toEqual(['send']);
+    await apply(form({ Action: 'Emergency switch', Feature: 'Sending', Switch: 'On for everyone' }));
+    expect(config().switchedOff).toEqual([]);
+    expect(config().features.send).toBe('on');
+    await assert.rejects(apply(form({ Action: 'Emergency switch', Feature: 'Teleport', Switch: 'Off for everyone' })), /not a feature/);
+  });
+
+  it('lists every app feature on the form and the admin page', async () => {
+    const { APP_FEATURES } = await import('./schema.ts');
+    const formText = fs.readFileSync(path.resolve(import.meta.dirname, '../.github/ISSUE_TEMPLATE/12-emergency-switch.yml'), 'utf8');
+    const admin = fs.readFileSync(path.resolve(import.meta.dirname, '../admin/index.html'), 'utf8');
+    for (const [key, f] of Object.entries(APP_FEATURES)) {
+      assert.ok(formText.includes(`        - ${f.label}\n`), `form is missing ${f.label}`);
+      assert.ok(admin.includes(`['${key}', '${f.label}', '${f.standard}']`), `admin page is missing ${key}`);
+    }
   });
 
   it('switches features off by country', async () => {

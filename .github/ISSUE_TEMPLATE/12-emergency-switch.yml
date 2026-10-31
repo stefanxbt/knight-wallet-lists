@@ -1,6 +1,6 @@
-name: Emergency switch
-description: Turn a feature off for everyone right away, for example if a partner service has problems. Turn it back on the same way.
-title: "Emergency switch"
+name: Feature switch
+description: Show a feature to everyone, only to testers, or hide it for everyone (for example when it breaks or isn't released yet). No new app build needed.
+title: "Feature switch"
 body:
   - type: dropdown
     id: action
@@ -15,20 +15,32 @@ body:
     id: feature
     attributes:
       label: Feature
+      description: Keep this list the same as APP_FEATURES in scripts/schema.ts (a test checks it).
       options:
         - Swaps
+        - Sending
         - WalletConnect
         - dApp browser
-        - Sending
+        - Hyperliquid trading
+        - Predictions (Polymarket)
+        - Send by link
+        - Tap to pay (NFC)
+        - Payment requests
+        - Friends
+        - Invite friends
     validations:
       required: true
   - type: dropdown
     id: switch
     attributes:
       label: Switch
-      description: This can only turn things off and back on. It can never switch on something the app itself keeps off, like sending real money before the security audit.
+      description: >-
+        Testers only = only the wallets on the real-money tester list see it. Off = its buttons, rows and banners
+        disappear from the app. Sending and Swaps stay on screen and say they are paused, so nobody thinks their money is gone.
+        This only shows or hides things: it can never switch on something the app itself keeps locked, like sending real money before the security audit.
       options:
+        - On for everyone
+        - Testers only
         - Off for everyone
-        - Back on
     validations:
       required: true
