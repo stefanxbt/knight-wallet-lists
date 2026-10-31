@@ -29,7 +29,8 @@ jobs:
           LISTS_SIGNING_KEY: ${{ secrets.LISTS_SIGNING_KEY }}
       - name: Save to main
         run: |
-          git add lists/signed 2>/dev/null || exit 0
+          # lists/app-config.json too: signing stamps its "issued" time (see sign-lists.mjs).
+          git add lists 2>/dev/null || exit 0
           git diff --cached --quiet && exit 0
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
