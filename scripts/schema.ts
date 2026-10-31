@@ -323,6 +323,34 @@ export function isBannerLive(banner: Banner, now: Date = new Date()): boolean {
 export const FEATURE_SWITCHES = ['swap', 'walletconnect', 'dappBrowser', 'send'] as const;
 export type FeatureSwitch = (typeof FEATURE_SWITCHES)[number];
 
+// Every feature the admin page can show or hide without a new app build, for example when it
+// breaks or isn't released yet. Each one is in one of three states:
+//   on       everyone sees it
+//   testers  only wallets on the signed tester list (realMoneyTesters) see it
+//   off      nobody sees it: its buttons, rows and screens are hidden, not just disabled
+// `standard` is the state when the lists don't mention the feature. RULE: every new feature is
+// added here, with standard 'testers' until it is released, so a new build never shows an
+// unreleased feature to everyone, even when the lists can't be downloaded.
+// These only show or hide things. Safety locks in the app's code (real money before the audit,
+// tester limits, country rules) stay in force whatever the lists say.
+export const FEATURE_STATES = ['on', 'testers', 'off'] as const;
+export type FeatureState = (typeof FEATURE_STATES)[number];
+export const APP_FEATURES = {
+  swap: { label: 'Swaps', standard: 'on' },
+  send: { label: 'Sending', standard: 'on' },
+  walletconnect: { label: 'WalletConnect', standard: 'on' },
+  dappBrowser: { label: 'dApp browser', standard: 'on' },
+  hyperliquid: { label: 'Hyperliquid trading', standard: 'on' },
+  predictions: { label: 'Predictions (Polymarket)', standard: 'on' },
+  sendByLink: { label: 'Send by link', standard: 'on' },
+  tapToPay: { label: 'Tap to pay (NFC)', standard: 'on' },
+  requests: { label: 'Payment requests', standard: 'on' },
+  friends: { label: 'Friends', standard: 'on' },
+  invite: { label: 'Invite friends', standard: 'on' },
+} as const satisfies Record<string, { label: string; standard: FeatureState }>;
+export type AppFeature = keyof typeof APP_FEATURES;
+const isAppFeature = (key: string): key is AppFeature => Object.prototype.hasOwnProperty.call(APP_FEATURES, key);
+
 // Features that can be switched off by country, for example where trading or betting apps are
 // not allowed. `blocked`: two-letter country codes (ISO 3166-1, e.g. "US"). `unknownOff`: also off
 // when the app can't tell the country.
@@ -349,6 +377,9 @@ export type AppConfig = {
   version: 1;
   notices: Notice[];
   switchedOff: FeatureSwitch[];
+  // Show / testers only / hide per feature (see APP_FEATURES). Features not listed use their
+  // standard state.
+  features?: Partial<Record<AppFeature, FeatureState>>;
   // Versions below this are asked to update, for example after a security fix.
   minVersion?: string;
   updateMessage?: string;
@@ -416,6 +447,17 @@ export function parseAppConfig(input: unknown): AppConfig {
     fail(`switchedOff may only list ${FEATURE_SWITCHES.join(', ')}`);
   }
   unique(switchedOff, (s) => s, 'Switch');
+  // Lenient on purpose: an older app ignores features it doesn't know yet (added for newer
+  // versions), and a state it doesn't understand counts as off, so nothing is shown by mistake.
+  let features: AppConfig['features'];
+  if (root.features !== undefined) {
+    const raw = object(root.features, 'features');
+    features = {};
+    for (const [key, value] of Object.entries(raw)) {
+      if (!isAppFeature(key)) continue;
+      features[key] = (FEATURE_STATES as readonly unknown[]).includes(value) ? (value as FeatureState) : 'off';
+    }
+  }
   let minVersion: string | undefined;
   if (root.minVersion !== undefined) {
     minVersion = text(root.minVersion, 'minVersion', 20);
@@ -476,6 +518,7 @@ export function parseAppConfig(input: unknown): AppConfig {
     version: 1,
     notices,
     switchedOff,
+    ...(features && Object.keys(features).length ? { features } : {}),
     ...(regions ? { regions } : {}),
     ...(realMoneyTesters?.length ? { realMoneyTesters } : {}),
     ...(testSwapFee ? { testSwapFee } : {}),
@@ -488,4 +531,20 @@ export function parseAppConfig(input: unknown): AppConfig {
 
 export function isNoticeLive(notice: Notice, now: Date = new Date()): boolean {
   return isBannerLive({ ...notice, link: '', placement: 'home' }, now);
+}
+
+// The state a feature is in. App versions from before the three states only read the older
+// emergency list (switchedOff), so the robot keeps Send, Swap, WalletConnect and the dApp browser
+// on that list whenever they are not on for everyone: old versions then hide them, and newer
+// ones still let testers see a "testers only" feature.
+export function featureState(config: AppConfig, feature: AppFeature): FeatureState {
+  const state = config.features?.[feature];
+  if ((config.switchedOff as readonly string[]).includes(feature)) return state === 'testers' ? 'testers' : 'off';
+  return state ?? APP_FEATURES[feature].standard;
+}
+
+// Whether this phone shows a feature. `tester`: the wallet in use is on the signed tester list.
+export function featureShown(config: AppConfig, feature: AppFeature, tester: boolean): boolean {
+  const state = featureState(config, feature);
+  return state === 'on' || (state === 'testers' && tester);
 }

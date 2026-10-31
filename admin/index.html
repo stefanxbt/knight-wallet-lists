@@ -126,9 +126,9 @@ details summary { cursor: pointer; color: var(--blue); font-size: 14px; }
   </section>
 
   <section>
-    <div class="head"><h2>Emergency switches</h2></div>
+    <div class="head"><h2>Feature switches</h2></div>
+    <p class="note">Show a feature to everyone, only to the real-money testers below, or hide it, without a new app build. Use it when something breaks or isn't released yet. Hidden means its buttons, rows and banners disappear; Sending and Swaps stay on screen and say they are paused. Phones pick a change up within about 5 minutes and remember it even without internet. New features start as testers only until you switch them on. This only shows or hides things: sending real money stays locked until the security audit, whatever this says. Admins only.</p>
     <ul id="switches"></ul>
-    <p class="note">These only turn a feature off for everyone, and back on. Sending real money stays off until the security audit, whatever this says.</p>
   </section>
 
   <section>
@@ -188,7 +188,29 @@ const REPO = 'stefanxbt/knight-wallet-lists';
 const NEW = `https://github.com/${REPO}/issues/new`;
 const NETWORK = { ethereum: 'Ethereum', bsc: 'BNB Chain', polygon: 'Polygon', blackfort: 'BlackFort', solana: 'Solana', tron: 'Tron', bitcoin: 'Bitcoin' };
 const REGION_FEATURES = [['hyperliquidTrade', 'Hyperliquid trading'], ['predictions', 'Predictions (Polymarket)'], ['swap', 'Swaps'], ['dappBrowser', 'dApp browser'], ['walletconnect', 'WalletConnect']];
-const FEATURES = [['swap', 'Swaps'], ['walletconnect', 'WalletConnect'], ['dappBrowser', 'dApp browser'], ['send', 'Sending']];
+// [key, label, state when the lists don't mention it]. Keep in step with APP_FEATURES in
+// scripts/schema.ts (a test checks it).
+const FEATURES = [
+  ['swap', 'Swaps', 'on'],
+  ['send', 'Sending', 'on'],
+  ['walletconnect', 'WalletConnect', 'on'],
+  ['dappBrowser', 'dApp browser', 'on'],
+  ['hyperliquid', 'Hyperliquid trading', 'on'],
+  ['predictions', 'Predictions (Polymarket)', 'on'],
+  ['sendByLink', 'Send by link', 'on'],
+  ['tapToPay', 'Tap to pay (NFC)', 'on'],
+  ['requests', 'Payment requests', 'on'],
+  ['friends', 'Friends', 'on'],
+  ['invite', 'Invite friends', 'on'],
+];
+// Same rule as featureState in scripts/schema.ts.
+function featureState(config, key, standard) {
+  const state = (config.features || {})[key];
+  if ((config.switchedOff || []).includes(key)) return state === 'testers' ? 'testers' : 'off';
+  return state || standard;
+}
+const STATE_LABEL = { on: ['On for everyone', 'on'], testers: ['Testers only', 'wait'], off: ['Hidden', 'crit'] };
+const STATE_DETAIL = { on: 'Everyone sees it.', testers: 'Only the real-money tester wallets see it.', off: 'Hidden for everyone.' };
 const PLACE = { home: 'Home', explore: 'Explore', swap: 'Swap' };
 
 // A link that opens a GitHub form with the fields already filled in.
@@ -239,7 +261,7 @@ async function main() {
   const blockedCount = blocklist.tokens.length + blocklist.nfts.length + blocklist.domains.length;
   const stat = (n, label, cls = '') => el('div', { class: `stat ${cls}` }, el('b', { text: String(n) }), el('small', { text: label }));
   document.getElementById('strip').replaceChildren(
-    stat(config.switchedOff.length, config.switchedOff.length ? 'features switched off' : 'features off', config.switchedOff.length ? 'bad' : 'ok'),
+    ((n) => stat(n, n ? 'features hidden' : 'all features on', n ? 'bad' : 'ok'))(FEATURES.filter(([k, , d]) => featureState(config, k, d) !== 'on').length),
     stat(liveMessages, 'messages showing', config.notices.some((n) => n.level === 'critical' && liveState(n)[1] === 'on') ? 'bad' : ''),
     stat(`${showingBanners}/${banners.banners.length}`, 'banners showing'),
     stat(dapps.dapps.length, 'dApps'),
@@ -247,10 +269,11 @@ async function main() {
     stat(blockedCount, 'scams blocked'),
   );
 
-  fill('switches', FEATURES.map(([key, label]) => {
-    const off = config.switchedOff.includes(key);
-    return row(label, off ? 'Hidden for everyone right now.' : 'Working normally.', pill(off ? 'Switched off' : 'On', off ? 'crit' : 'on'),
-      btn(off ? 'Turn back on' : 'Turn off for everyone', form('12-emergency-switch.yml', { feature: label, switch: off ? 'Back on' : 'Off for everyone' }), off ? '' : 'danger'));
+  fill('switches', FEATURES.map(([key, label, standard]) => {
+    const state = featureState(config, key, standard);
+    const to = (s, text, cls = '') => (s === state ? null : btn(text, form('12-emergency-switch.yml', { feature: label, switch: STATE_LABEL[s][0] === 'Hidden' ? 'Off for everyone' : STATE_LABEL[s][0] }), cls));
+    return row(label, STATE_DETAIL[state], pill(...STATE_LABEL[state]),
+      to('on', 'Show to everyone'), to('testers', 'Testers only'), to('off', 'Hide for everyone', 'danger'));
   }), '');
 
   fill('regions', REGION_FEATURES.map(([key, label]) => {

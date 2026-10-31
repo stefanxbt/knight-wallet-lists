@@ -12,6 +12,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
+  APP_FEATURES,
+  FEATURE_SWITCHES,
+  featureState,
   addressKey,
   isBannerLive,
   isValidAddress,
@@ -366,13 +369,18 @@ function removeBanner(fields) {
 }
 
 const LEVELS = { Info: 'info', Warning: 'warning', Critical: 'critical' };
-const FEATURES = { Swaps: 'swap', WalletConnect: 'walletconnect', 'dApp browser': 'dappBrowser', Sending: 'send' };
+// Admin page label -> feature key, from the shared list in schema.ts.
+const FEATURES = Object.fromEntries(Object.entries(APP_FEATURES).map(([key, f]) => [f.label, key]));
+// "Back on" is what the form said before features could be limited to testers.
+const FEATURE_STATE_CHOICES = { 'On for everyone': 'on', 'Back on': 'on', 'Testers only': 'testers', 'Off for everyone': 'off' };
+const STATE_TEXT = { on: 'on for everyone', testers: 'testers only', off: 'off for everyone' };
 
 function configStatus(config, now = new Date()) {
   const lines = [];
-  lines.push(config.switchedOff.length
-    ? `**Switched off for everyone:** ${config.switchedOff.map((f) => Object.keys(FEATURES).find((k) => FEATURES[k] === f)).join(', ')}`
-    : '**Switched off for everyone:** nothing');
+  const limited = Object.keys(APP_FEATURES).filter((f) => featureState(config, f) !== 'on');
+  lines.push(limited.length
+    ? `**Hidden features:** ${limited.map((f) => `${APP_FEATURES[f].label} (${STATE_TEXT[featureState(config, f)]})`).join(', ')}`
+    : '**Hidden features:** none, everything is on');
   lines.push(config.minVersion ? `**Asking to update:** everyone below ${config.minVersion}` : '**Asking to update:** no');
   if (config.notices.length) {
     lines.push('', '| Message | How serious | Status |', '| --- | --- | --- |');
@@ -430,12 +438,17 @@ function emergencySwitch(fields) {
   const label = field(fields, 'Feature');
   const feature = FEATURES[label];
   if (!feature) fail(`"${label}" is not a feature I can switch.`);
-  const off = field(fields, 'Switch') === 'Off for everyone';
-  config.switchedOff = off ? [...new Set([...config.switchedOff, feature])] : config.switchedOff.filter((f) => f !== feature);
+  const state = FEATURE_STATE_CHOICES[field(fields, 'Switch')];
+  if (!state) fail(`Pick one of: ${Object.keys(FEATURE_STATE_CHOICES).filter((c) => c !== 'Back on').join(', ')}.`);
+  config.features = { ...(config.features ?? {}), [feature]: state };
+  // App versions from before "testers only" read just this list (see featureState in schema.ts).
+  if (FEATURE_SWITCHES.includes(feature)) {
+    config.switchedOff = state === 'on' ? config.switchedOff.filter((f) => f !== feature) : [...new Set([...config.switchedOff, feature])];
+  }
   write('app-config.json', parseAppConfig(config));
   return {
-    summary: `${label} is now **${off ? 'off for everyone' : 'back on'}**.\n\n${configStatus(config)}`,
-    commit: `${off ? 'Switch off' : 'Switch back on'} ${label}`,
+    summary: `${label} is now **${STATE_TEXT[state]}**.\n\n${configStatus(config)}`,
+    commit: `${label}: ${STATE_TEXT[state]}`,
   };
 }
 

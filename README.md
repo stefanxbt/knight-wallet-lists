@@ -9,7 +9,7 @@ repo every time it opens, so a change reaches phones without a new app build.
 | `tokens.json` | The tokens shown in everyone's wallet (besides the main coins) |
 | `blocklist.json` | Scam tokens and NFTs that get hidden, and scam websites the dApp browser blocks |
 | `banners.json` (+ pictures in `banners/`) | Promo banners on the Home screen, Explore tab or Swap screen |
-| `app-config.json` | Messages to all users, emergency off switches, and the "please update" prompt |
+| `app-config.json` | Messages to all users, feature switches (on / testers only / hidden), and the "please update" prompt |
 
 **Scam websites** come from two free public lists, rebuilt every day by the
 "Scam websites" workflow and published on the
@@ -45,7 +45,7 @@ the change within about a minute, replies on the page and closes it.
 - [Remove a banner](https://github.com/stefanxbt/knight-wallet-lists/issues/new?template=9-remove-banner.yml)
 - [Send a message to all users](https://github.com/stefanxbt/knight-wallet-lists/issues/new?template=10-send-message.yml)
 - [Switch a message on, off or delete it](https://github.com/stefanxbt/knight-wallet-lists/issues/new?template=11-switch-message.yml)
-- [Emergency switch: turn a feature off for everyone](https://github.com/stefanxbt/knight-wallet-lists/issues/new?template=12-emergency-switch.yml)
+- [Feature switch: show a feature to everyone, testers only, or hide it](https://github.com/stefanxbt/knight-wallet-lists/issues/new?template=12-emergency-switch.yml)
 - [Ask users to update](https://github.com/stefanxbt/knight-wallet-lists/issues/new?template=13-ask-to-update.yml)
 
 For **Add a token**, you usually only need the network and the contract
