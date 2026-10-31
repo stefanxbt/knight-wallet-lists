@@ -1,0 +1,29 @@
+name: Real-money tester
+description: Let a wallet switch on small real-money tests in the test app (or take that away). Admins only.
+title: "Real-money tester"
+body:
+  - type: dropdown
+    id: action
+    attributes:
+      label: Action
+      options:
+        - Real-money tester
+      default: 0
+    validations:
+      required: true
+  - type: dropdown
+    id: change
+    attributes:
+      label: Change
+      options:
+        - Add
+        - Remove
+    validations:
+      required: true
+  - type: input
+    id: address
+    attributes:
+      label: Wallet address
+      description: The wallet's Ethereum address (starts with 0x). In Knight Wallet, Receive shows it. Only the address, never the recovery phrase.
+    validations:
+      required: true

@@ -33,5 +33,9 @@
       ],
       "unknownOff": true
     }
-  }
+  },
+  "realMoneyTesters": [
+    "0x975c46a48b0103692309ad8d6083606f429c54a8",
+    "0x92c184ab7c945185fc19e6ef7b38fc5ac2022b17"
+  ]
 }

@@ -138,6 +138,12 @@ details summary { cursor: pointer; color: var(--blue); font-size: 14px; }
   </section>
 
   <section>
+    <div class="head"><h2>Real-money testers</h2><a class="btn primary" id="add-tester">+ Add tester</a></div>
+    <ul id="testers"></ul>
+    <p class="note">Only these wallets see the switch for small real-money tests in the test app ($20 a send, $50 a day). Everyone else, including anyone who downloads the public test app, stays on test money. Add a wallet by its address (starts with 0x, shown under Receive). Admins only.</p>
+  </section>
+
+  <section>
     <div class="head"><h2>Messages to all users</h2><a class="btn primary" id="add-message">+ New message</a></div>
     <ul id="messages"></ul>
     <div class="head"><span class="note" id="update-state"></span><a class="btn" id="ask-update">Ask users to update</a></div>
@@ -254,6 +260,11 @@ async function main() {
       btn(rule.unknownOff ? 'Allow unknown' : 'Off if unknown', form('14-country-rule.yml', { feature: label, change: rule.unknownOff ? 'When the country is unknown, allow it' : 'When the country is unknown, keep it off' })));
   }), '');
 
+  fill('testers', (config.realMoneyTesters || []).map((a) =>
+    row(`${a.slice(0, 6)}…${a.slice(-4)}`, a, pill('Can test real money', 'wait'),
+      btn('Remove', form('15-real-money-tester.yml', { change: 'Remove', address: a }), 'danger'))
+  ), 'Nobody. Real-money tests are off for every wallet.');
+
   fill('messages', config.notices.map((n) => {
     const [text, cls] = liveState(n);
     return row(n.title, n.text, el('span', { class: 'actions' }, pill(n.level, n.level === 'critical' ? 'crit' : n.level === 'warning' ? 'wait' : 'off'), pill(text, cls)),
@@ -293,6 +304,7 @@ async function main() {
     btn('Unblock', form('6-unblock.yml', fields)))), 'Nothing blocked yet. MetaMask’s list of about 113,000 scam sites is always checked as well.');
 
   document.getElementById('add-message').href = form('10-send-message.yml');
+  document.getElementById('add-tester').href = form('15-real-money-tester.yml', { change: 'Add' });
   document.getElementById('add-banner').href = form('7-add-banner.yml');
   document.getElementById('add-dapp').href = form('1-add-dapp.yml');
   document.getElementById('add-token').href = form('3-add-token.yml');

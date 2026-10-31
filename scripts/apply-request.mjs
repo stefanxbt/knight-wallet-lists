@@ -483,6 +483,24 @@ function countryRule(fields) {
   return { summary: `${done}\n\n${regionStatus(config)}`, commit: `Country rule: ${label}` };
 }
 
+function realMoneyTester(fields) {
+  const config = parseAppConfig(read('app-config.json'));
+  const change = field(fields, 'Change');
+  const address = field(fields, 'Wallet address').toLowerCase();
+  if (!/^0x[0-9a-f]{40}$/.test(address)) fail('The wallet address must be an Ethereum-style address: 0x and 40 letters or numbers.');
+  const testers = new Set(config.realMoneyTesters ?? []);
+  if (change === 'Add') testers.add(address);
+  else if (change === 'Remove') testers.delete(address);
+  else fail('Pick Add or Remove.');
+  config.realMoneyTesters = [...testers];
+  write('app-config.json', parseAppConfig(config));
+  const list = config.realMoneyTesters.length ? config.realMoneyTesters.map((a) => `- \`${a}\``).join('\n') : 'Nobody.';
+  return {
+    summary: `${change === 'Add' ? 'Added' : 'Removed'} \`${address}\`. Wallets that can switch on real-money tests:\n\n${list}`,
+    commit: `${change} real-money tester ${address.slice(0, 10)}`,
+  };
+}
+
 function askToUpdate(fields) {
   const config = parseAppConfig(read('app-config.json'));
   const min = field(fields, 'Lowest version that is still fine', { optional: true });
@@ -516,6 +534,7 @@ const ACTIONS = {
   'Emergency switch': emergencySwitch,
   'Ask users to update': askToUpdate,
   'Country rule': countryRule,
+  'Real-money tester': realMoneyTester,
 };
 
 export async function apply(body) {
