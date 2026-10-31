@@ -360,6 +360,9 @@ export type AppConfig = {
   // Knight's LI.FI swap fee during the real-money test only (0.005 = 0.5%, at most 0.01), so the
   // team can check fees reach the fee wallet. Applies only to testers in the test app.
   testSwapFee?: number;
+  // Which "Add to … Wallet" buttons Receive shows (see src/walletPass/pass.ts). Each one is
+  // switched on only once that wallet's issuer account and signing key are set up.
+  walletPasses?: { apple?: boolean; google?: boolean; samsung?: boolean };
 };
 
 const VERSION = /^\d+\.\d+\.\d+$/;
@@ -443,6 +446,17 @@ export function parseAppConfig(input: unknown): AppConfig {
       fail('testSwapFee must be a share between 0 and 0.01 (1%)');
     }
   }
+  let walletPasses: AppConfig['walletPasses'];
+  if (root.walletPasses !== undefined) {
+    const w = root.walletPasses as Record<string, unknown>;
+    if (!w || typeof w !== 'object' || Array.isArray(w)) fail('walletPasses must be an object');
+    walletPasses = {};
+    for (const [k, v] of Object.entries(w)) {
+      if (k !== 'apple' && k !== 'google' && k !== 'samsung') fail(`walletPasses: unknown wallet ${k}`);
+      if (typeof v !== 'boolean') fail(`walletPasses.${k} must be true or false`);
+      if (v) walletPasses[k] = true;
+    }
+  }
   return {
     version: 1,
     notices,
@@ -450,6 +464,7 @@ export function parseAppConfig(input: unknown): AppConfig {
     ...(regions ? { regions } : {}),
     ...(realMoneyTesters?.length ? { realMoneyTesters } : {}),
     ...(testSwapFee ? { testSwapFee } : {}),
+    ...(walletPasses && Object.keys(walletPasses).length ? { walletPasses } : {}),
     ...(minVersion ? { minVersion } : {}),
     ...(root.updateMessage !== undefined ? { updateMessage: text(root.updateMessage, 'updateMessage', 300) } : {}),
   };
