@@ -4,11 +4,11 @@
 // It has no imports so it runs under plain Node (scripts/apply-request.mjs).
 // Keep it to type-erasable TypeScript: no enums, no namespaces.
 
-export const LIST_CHAINS = ['bitcoin', 'ethereum', 'bsc', 'polygon', 'blackfort', 'solana', 'tron'] as const;
+export const LIST_CHAINS = ['bitcoin', 'ethereum', 'bsc', 'polygon', 'blackfort', 'hyperevm', 'solana', 'tron'] as const;
 export type ListChain = (typeof LIST_CHAINS)[number];
 
 // Chains that have tokens and NFTs at a contract address.
-export const TOKEN_CHAINS = ['ethereum', 'bsc', 'polygon', 'blackfort', 'solana', 'tron'] as const;
+export const TOKEN_CHAINS = ['ethereum', 'bsc', 'polygon', 'blackfort', 'hyperevm', 'solana', 'tron'] as const;
 export type TokenChain = (typeof TOKEN_CHAINS)[number];
 
 export const DAPP_CATEGORIES = ['exchange', 'lending', 'staking', 'nft', 'other'] as const;
@@ -323,6 +323,14 @@ export function isBannerLive(banner: Banner, now: Date = new Date()): boolean {
 export const FEATURE_SWITCHES = ['swap', 'walletconnect', 'dappBrowser', 'send'] as const;
 export type FeatureSwitch = (typeof FEATURE_SWITCHES)[number];
 
+// Features that can be switched off by country, for example where trading or betting apps are
+// not allowed. `blocked`: two-letter country codes (ISO 3166-1, e.g. "US"). `unknownOff`: also off
+// when the app can't tell the country.
+export const REGION_FEATURES = ['hyperliquidTrade', 'predictions', 'swap', 'dappBrowser', 'walletconnect'] as const;
+export type RegionFeature = (typeof REGION_FEATURES)[number];
+export type RegionRule = { blocked: string[]; unknownOff: boolean };
+const COUNTRY = /^[A-Z]{2}$/;
+
 export const NOTICE_LEVELS = ['info', 'warning', 'critical'] as const;
 export type NoticeLevel = (typeof NOTICE_LEVELS)[number];
 
@@ -344,6 +352,8 @@ export type AppConfig = {
   // Versions below this are asked to update, for example after a security fix.
   minVersion?: string;
   updateMessage?: string;
+  // Country rules per feature. A feature without a rule is on everywhere.
+  regions?: Partial<Record<RegionFeature, RegionRule>>;
 };
 
 const VERSION = /^\d+\.\d+\.\d+$/;
@@ -399,10 +409,25 @@ export function parseAppConfig(input: unknown): AppConfig {
     minVersion = text(root.minVersion, 'minVersion', 20);
     if (!VERSION.test(minVersion)) fail('minVersion must look like 1.2.0');
   }
+  let regions: AppConfig['regions'];
+  if (root.regions !== undefined) {
+    const raw = object(root.regions, 'regions');
+    regions = {};
+    for (const [feature, value] of Object.entries(raw)) {
+      if (!(REGION_FEATURES as readonly string[]).includes(feature)) fail(`regions may only name ${REGION_FEATURES.join(', ')}`);
+      const rule = object(value, `regions.${feature}`);
+      const blocked = array(rule.blocked, `regions.${feature}.blocked`).map((c) => String(c).toUpperCase());
+      if (blocked.some((c) => !COUNTRY.test(c))) fail(`regions.${feature}.blocked must be two-letter country codes like US`);
+      if (blocked.length > 250) fail(`regions.${feature}.blocked is too long`);
+      unique(blocked, (c) => c, 'Country');
+      regions[feature as RegionFeature] = { blocked: blocked.sort(), unknownOff: rule.unknownOff === true };
+    }
+  }
   return {
     version: 1,
     notices,
     switchedOff,
+    ...(regions ? { regions } : {}),
     ...(minVersion ? { minVersion } : {}),
     ...(root.updateMessage !== undefined ? { updateMessage: text(root.updateMessage, 'updateMessage', 300) } : {}),
   };

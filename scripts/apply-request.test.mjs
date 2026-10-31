@@ -192,6 +192,17 @@ describe('app settings', () => {
     expect(r.summary).toMatch(/Swaps is now \*\*back on\*\*/);
   });
 
+  it('switches features off by country', async () => {
+    await apply(form({ Action: 'Country rule', Feature: 'Hyperliquid trading', Change: 'Switch off in these countries', Countries: 'us, gb' }));
+    expect(['GB', 'US'].every((c) => config().regions.hyperliquidTrade.blocked.includes(c))).toBe(true);
+    await apply(form({ Action: 'Country rule', Feature: 'Hyperliquid trading', Change: 'Switch back on in these countries', Countries: 'GB' }));
+    expect(config().regions.hyperliquidTrade.blocked.includes('GB')).toBe(false);
+    const r = await apply(form({ Action: 'Country rule', Feature: 'Swaps', Change: 'When the country is unknown, keep it off', Countries: '_No response_' }));
+    expect(config().regions.swap.unknownOff).toBe(true);
+    expect(r.summary).toMatch(/\| Swaps \| nowhere \| off \|/);
+    await expect(apply(form({ Action: 'Country rule', Feature: 'Swaps', Change: 'Switch off in these countries', Countries: 'USA' }))).rejects.toThrow(/two-letter/);
+  });
+
   it('asks old versions to update, and stops asking', async () => {
     await apply(form({ Action: 'Ask users to update', 'Lowest version that is still fine': '1.0.1', Message: 'Security fix.' }));
     expect(config()).toMatchObject({ minVersion: '1.0.1', updateMessage: 'Security fix.' });

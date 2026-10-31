@@ -439,6 +439,50 @@ function emergencySwitch(fields) {
   };
 }
 
+const REGION_FEATURES = {
+  'Hyperliquid trading': 'hyperliquidTrade',
+  'Predictions (Polymarket)': 'predictions',
+  Swaps: 'swap',
+  'dApp browser': 'dappBrowser',
+  WalletConnect: 'walletconnect',
+};
+
+function regionStatus(config) {
+  const lines = ['| Feature | Off in | Unknown country |', '| --- | --- | --- |'];
+  for (const [label, key] of Object.entries(REGION_FEATURES)) {
+    const rule = config.regions?.[key];
+    lines.push(`| ${label} | ${rule?.blocked.length ? rule.blocked.join(', ') : 'nowhere'} | ${rule?.unknownOff ? 'off' : 'on'} |`);
+  }
+  return lines.join('\n');
+}
+
+function countryRule(fields) {
+  const config = parseAppConfig(read('app-config.json'));
+  const label = field(fields, 'Feature');
+  const feature = REGION_FEATURES[label];
+  if (!feature) fail(`"${label}" is not a feature with country rules.`);
+  const change = field(fields, 'Change');
+  const codes = (field(fields, 'Countries', { optional: true }) ?? '')
+    .split(/[\s,;]+/)
+    .map((c) => c.trim().toUpperCase())
+    .filter(Boolean);
+  if (codes.some((c) => !/^[A-Z]{2}$/.test(c))) fail('Countries must be two-letter codes like US, GB, FR, separated by commas.');
+  const rule = config.regions?.[feature] ?? { blocked: [], unknownOff: false };
+  let done;
+  if (change === 'Switch off in these countries' || change === 'Switch back on in these countries') {
+    if (!codes.length) fail('Name at least one country, for example US.');
+    const off = change.startsWith('Switch off');
+    rule.blocked = off ? [...new Set([...rule.blocked, ...codes])] : rule.blocked.filter((c) => !codes.includes(c));
+    done = `${label} is now **${off ? 'off' : 'back on'}** in ${codes.join(', ')}.`;
+  } else if (change.startsWith('When the country is unknown')) {
+    rule.unknownOff = change.endsWith('keep it off');
+    done = `${label} is now **${rule.unknownOff ? 'off' : 'on'}** when the app can't tell the country.`;
+  } else fail('Pick what to change.');
+  config.regions = { ...(config.regions ?? {}), [feature]: rule };
+  write('app-config.json', parseAppConfig(config));
+  return { summary: `${done}\n\n${regionStatus(config)}`, commit: `Country rule: ${label}` };
+}
+
 function askToUpdate(fields) {
   const config = parseAppConfig(read('app-config.json'));
   const min = field(fields, 'Lowest version that is still fine', { optional: true });
@@ -471,6 +515,7 @@ const ACTIONS = {
   'Switch a message': switchMessage,
   'Emergency switch': emergencySwitch,
   'Ask users to update': askToUpdate,
+  'Country rule': countryRule,
 };
 
 export async function apply(body) {

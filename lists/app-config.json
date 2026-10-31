@@ -9,5 +9,29 @@
       "active": true
     }
   ],
-  "switchedOff": []
+  "switchedOff": [],
+  "regions": {
+    "hyperliquidTrade": {
+      "blocked": [
+        "CU",
+        "IR",
+        "KP",
+        "SY",
+        "US"
+      ],
+      "unknownOff": true
+    },
+    "predictions": {
+      "blocked": [
+        "CU",
+        "FR",
+        "GB",
+        "IR",
+        "KP",
+        "SY",
+        "US"
+      ],
+      "unknownOff": true
+    }
+  }
 }

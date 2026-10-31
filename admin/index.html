@@ -132,6 +132,12 @@ details summary { cursor: pointer; color: var(--blue); font-size: 14px; }
   </section>
 
   <section>
+    <div class="head"><h2>Countries</h2></div>
+    <ul id="regions"></ul>
+    <p class="note">Switch features off where they are not allowed. The app checks the phone's region and its internet connection, and the feature is off if either is a listed country. Admins only. Please check the country list with a lawyer.</p>
+  </section>
+
+  <section>
     <div class="head"><h2>Messages to all users</h2><a class="btn primary" id="add-message">+ New message</a></div>
     <ul id="messages"></ul>
     <div class="head"><span class="note" id="update-state"></span><a class="btn" id="ask-update">Ask users to update</a></div>
@@ -173,6 +179,7 @@ details summary { cursor: pointer; color: var(--blue); font-size: 14px; }
 const REPO = 'stefanxbt/knight-wallet-lists';
 const NEW = `https://github.com/${REPO}/issues/new`;
 const NETWORK = { ethereum: 'Ethereum', bsc: 'BNB Chain', polygon: 'Polygon', blackfort: 'BlackFort', solana: 'Solana', tron: 'Tron', bitcoin: 'Bitcoin' };
+const REGION_FEATURES = [['hyperliquidTrade', 'Hyperliquid trading'], ['predictions', 'Predictions (Polymarket)'], ['swap', 'Swaps'], ['dappBrowser', 'dApp browser'], ['walletconnect', 'WalletConnect']];
 const FEATURES = [['swap', 'Swaps'], ['walletconnect', 'WalletConnect'], ['dappBrowser', 'dApp browser'], ['send', 'Sending']];
 const PLACE = { home: 'Home', explore: 'Explore', swap: 'Swap' };
 
@@ -236,6 +243,15 @@ async function main() {
     const off = config.switchedOff.includes(key);
     return row(label, off ? 'Hidden for everyone right now.' : 'Working normally.', pill(off ? 'Switched off' : 'On', off ? 'crit' : 'on'),
       btn(off ? 'Turn back on' : 'Turn off for everyone', form('12-emergency-switch.yml', { feature: label, switch: off ? 'Back on' : 'Off for everyone' }), off ? '' : 'danger'));
+  }), '');
+
+  fill('regions', REGION_FEATURES.map(([key, label]) => {
+    const rule = (config.regions || {})[key] || { blocked: [], unknownOff: false };
+    const detail = `${rule.blocked.length ? `Off in ${rule.blocked.join(', ')}` : 'On in every country'}. Unknown country: ${rule.unknownOff ? 'off' : 'on'}.`;
+    return row(label, detail, pill(rule.blocked.length ? `${rule.blocked.length} off` : 'Everywhere', rule.blocked.length ? 'wait' : 'on'),
+      btn('Switch off in…', form('14-country-rule.yml', { feature: label, change: 'Switch off in these countries' }), 'danger'),
+      btn('Back on in…', form('14-country-rule.yml', { feature: label, change: 'Switch back on in these countries' })),
+      btn(rule.unknownOff ? 'Allow unknown' : 'Off if unknown', form('14-country-rule.yml', { feature: label, change: rule.unknownOff ? 'When the country is unknown, allow it' : 'When the country is unknown, keep it off' })));
   }), '');
 
   fill('messages', config.notices.map((n) => {

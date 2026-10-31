@@ -1,0 +1,43 @@
+name: Country rule
+description: Switch a feature off (or back on) in some countries, for example where trading or betting apps are not allowed. Admins only.
+title: "Country rule"
+body:
+  - type: dropdown
+    id: action
+    attributes:
+      label: Action
+      options:
+        - Country rule
+      default: 0
+    validations:
+      required: true
+  - type: dropdown
+    id: feature
+    attributes:
+      label: Feature
+      options:
+        - Hyperliquid trading
+        - Predictions (Polymarket)
+        - Swaps
+        - dApp browser
+        - WalletConnect
+    validations:
+      required: true
+  - type: dropdown
+    id: change
+    attributes:
+      label: Change
+      options:
+        - Switch off in these countries
+        - Switch back on in these countries
+        - When the country is unknown, keep it off
+        - When the country is unknown, allow it
+    validations:
+      required: true
+  - type: input
+    id: countries
+    attributes:
+      label: Countries
+      description: Two-letter country codes, separated by commas, for example US, GB, FR. Leave empty for the "unknown" choices.
+    validations:
+      required: false
