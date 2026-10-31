@@ -214,6 +214,15 @@ describe('app settings', () => {
     await expect(apply(form({ Action: 'Real-money tester', Change: 'Add', 'Wallet address': 'bc1qxyz' }))).rejects.toThrow(/0x/);
   });
 
+  it('sets and clears the test swap fee', async () => {
+    const r = await apply(form({ Action: 'Test swap fee', Fee: '0.5%' }));
+    expect(config().testSwapFee).toBe(0.005);
+    expect(r.summary).toMatch(/0.5%/);
+    await apply(form({ Action: 'Test swap fee', Fee: 'Off' }));
+    expect(config().testSwapFee).toBe(undefined);
+    await expect(apply(form({ Action: 'Test swap fee', Fee: '5%' }))).rejects.toThrow(/Pick/);
+  });
+
   it('asks old versions to update, and stops asking', async () => {
     await apply(form({ Action: 'Ask users to update', 'Lowest version that is still fine': '1.0.1', Message: 'Security fix.' }));
     expect(config()).toMatchObject({ minVersion: '1.0.1', updateMessage: 'Security fix.' });

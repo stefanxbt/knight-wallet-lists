@@ -357,6 +357,9 @@ export type AppConfig = {
   // Wallets (Ethereum address, lowercase) allowed to switch on small real-money tests in the
   // test app. Nobody else sees the switch, so a public test app can't move real money.
   realMoneyTesters?: string[];
+  // Knight's LI.FI swap fee during the real-money test only (0.005 = 0.5%, at most 0.01), so the
+  // team can check fees reach the fee wallet. Applies only to testers in the test app.
+  testSwapFee?: number;
 };
 
 const VERSION = /^\d+\.\d+\.\d+$/;
@@ -433,12 +436,20 @@ export function parseAppConfig(input: unknown): AppConfig {
     if (realMoneyTesters.length > 50) fail('realMoneyTesters may list at most 50 wallets');
     unique(realMoneyTesters, (a) => a, 'Tester');
   }
+  let testSwapFee: number | undefined;
+  if (root.testSwapFee !== undefined) {
+    testSwapFee = root.testSwapFee as number;
+    if (typeof testSwapFee !== 'number' || !Number.isFinite(testSwapFee) || testSwapFee < 0 || testSwapFee > 0.01) {
+      fail('testSwapFee must be a share between 0 and 0.01 (1%)');
+    }
+  }
   return {
     version: 1,
     notices,
     switchedOff,
     ...(regions ? { regions } : {}),
     ...(realMoneyTesters?.length ? { realMoneyTesters } : {}),
+    ...(testSwapFee ? { testSwapFee } : {}),
     ...(minVersion ? { minVersion } : {}),
     ...(root.updateMessage !== undefined ? { updateMessage: text(root.updateMessage, 'updateMessage', 300) } : {}),
   };

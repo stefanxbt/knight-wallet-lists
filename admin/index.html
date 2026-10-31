@@ -139,6 +139,7 @@ details summary { cursor: pointer; color: var(--blue); font-size: 14px; }
 
   <section>
     <div class="head"><h2>Real-money testers</h2><a class="btn primary" id="add-tester">+ Add tester</a></div>
+    <p class="note" id="test-fee"></p>
     <ul id="testers"></ul>
     <p class="note">Only these wallets see the switch for small real-money tests in the test app ($20 a send, $50 a day). Everyone else, including anyone who downloads the public test app, stays on test money. Add a wallet by its address (starts with 0x, shown under Receive). Admins only.</p>
   </section>
@@ -305,6 +306,8 @@ async function main() {
 
   document.getElementById('add-message').href = form('10-send-message.yml');
   document.getElementById('add-tester').href = form('15-real-money-tester.yml', { change: 'Add' });
+  const fee = config.testSwapFee ? `${+(config.testSwapFee * 100).toFixed(2)}%` : 'Off';
+  document.getElementById('test-fee').replaceChildren(`Test swap fee for these wallets: ${fee}. `, btn('Change fee', form('16-test-swap-fee.yml', { fee })));
   document.getElementById('add-banner').href = form('7-add-banner.yml');
   document.getElementById('add-dapp').href = form('1-add-dapp.yml');
   document.getElementById('add-token').href = form('3-add-token.yml');

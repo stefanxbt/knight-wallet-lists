@@ -501,6 +501,21 @@ function realMoneyTester(fields) {
   };
 }
 
+const TEST_FEES = { Off: 0, '0.25%': 0.0025, '0.5%': 0.005, '1%': 0.01 };
+
+function testSwapFee(fields) {
+  const config = parseAppConfig(read('app-config.json'));
+  const choice = field(fields, 'Fee');
+  if (!(choice in TEST_FEES)) fail('Pick Off, 0.25%, 0.5% or 1%.');
+  delete config.testSwapFee;
+  if (TEST_FEES[choice]) config.testSwapFee = TEST_FEES[choice];
+  write('app-config.json', parseAppConfig(config));
+  return {
+    summary: choice === 'Off' ? 'Test swap fee is off.' : `Real-money testers now pay a ${choice} Knight fee on swaps. Everyone else pays none.`,
+    commit: `Test swap fee ${choice}`,
+  };
+}
+
 function askToUpdate(fields) {
   const config = parseAppConfig(read('app-config.json'));
   const min = field(fields, 'Lowest version that is still fine', { optional: true });
@@ -535,6 +550,7 @@ const ACTIONS = {
   'Ask users to update': askToUpdate,
   'Country rule': countryRule,
   'Real-money tester': realMoneyTester,
+  'Test swap fee': testSwapFee,
 };
 
 export async function apply(body) {

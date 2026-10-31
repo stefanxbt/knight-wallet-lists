@@ -1,0 +1,25 @@
+name: Test swap fee
+description: Knight's swap fee during the real-money test, so you can check fees reach the fee wallet. Only real-money testers pay it. Admins only.
+title: "Test swap fee"
+body:
+  - type: dropdown
+    id: action
+    attributes:
+      label: Action
+      options:
+        - Test swap fee
+      default: 0
+    validations:
+      required: true
+  - type: dropdown
+    id: fee
+    attributes:
+      label: Fee
+      description: Share of each swap kept as Knight's fee. Everyone who is not a real-money tester pays no fee until the audit.
+      options:
+        - "Off"
+        - "0.25%"
+        - "0.5%"
+        - "1%"
+    validations:
+      required: true
