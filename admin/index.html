@@ -140,8 +140,9 @@ details summary { cursor: pointer; color: var(--blue); font-size: 14px; }
   <section>
     <div class="head"><h2>Real-money testers</h2><a class="btn primary" id="add-tester">+ Add tester</a></div>
     <p class="note" id="test-fee"></p>
+    <p class="note" id="test-limits"></p>
     <ul id="testers"></ul>
-    <p class="note">Only these wallets see the switch for small real-money tests in the test app ($20 a send, $50 a day). Everyone else, including anyone who downloads the public test app, stays on test money. Add a wallet by its address (starts with 0x, shown under Receive). Admins only.</p>
+    <p class="note">Only these wallets see the switch for real-money tests in the test app (limits below). Everyone else, including anyone who downloads the public test app, stays on test money. Add a wallet by its address (starts with 0x, shown under Receive). Admins only.</p>
   </section>
 
   <section>
@@ -306,6 +307,10 @@ async function main() {
 
   document.getElementById('add-message').href = form('10-send-message.yml');
   document.getElementById('add-tester').href = form('15-real-money-tester.yml', { change: 'Add' });
+  const lim = config.testLimits || {};
+  const perAction = lim.perActionUsd || 100, perDay = lim.perDayUsd || 500;
+  document.getElementById('test-limits').replaceChildren(`Limits for these wallets: $${perAction} per action, $${perDay} per day. `,
+    btn('Change limits', form('17-test-limits.yml', { 'per-action': `$${perAction}`, 'per-day': `$${perDay}` })));
   const fee = config.testSwapFee ? `${+(config.testSwapFee * 100).toFixed(2)}%` : 'Off';
   document.getElementById('test-fee').replaceChildren(`Test swap fee for these wallets: ${fee}. `, btn('Change fee', form('16-test-swap-fee.yml', { fee })));
   document.getElementById('add-banner').href = form('7-add-banner.yml');

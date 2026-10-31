@@ -516,6 +516,25 @@ function testSwapFee(fields) {
   };
 }
 
+const PER_ACTION = ['$20', '$50', '$100', '$250'];
+const PER_DAY = ['$50', '$100', '$250', '$500', '$1000'];
+
+function testLimits(fields) {
+  const config = parseAppConfig(read('app-config.json'));
+  const action = field(fields, 'Per action');
+  const day = field(fields, 'Per day');
+  if (!PER_ACTION.includes(action) || !PER_DAY.includes(day)) fail('Pick the limits from the lists.');
+  const perActionUsd = Number(action.slice(1));
+  const perDayUsd = Number(day.slice(1));
+  if (perActionUsd > perDayUsd) fail('The limit per action can not be more than the limit per day.');
+  config.testLimits = { perActionUsd, perDayUsd };
+  write('app-config.json', parseAppConfig(config));
+  return {
+    summary: `Real-money testers can now move up to ${action} per action and ${day} per day.`,
+    commit: `Real-money test limits ${action} / ${day}`,
+  };
+}
+
 function askToUpdate(fields) {
   const config = parseAppConfig(read('app-config.json'));
   const min = field(fields, 'Lowest version that is still fine', { optional: true });
@@ -551,6 +570,7 @@ const ACTIONS = {
   'Country rule': countryRule,
   'Real-money tester': realMoneyTester,
   'Test swap fee': testSwapFee,
+  'Real-money test limits': testLimits,
 };
 
 export async function apply(body) {

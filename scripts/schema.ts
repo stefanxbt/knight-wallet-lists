@@ -363,6 +363,9 @@ export type AppConfig = {
   // Which "Add to … Wallet" buttons Receive shows (see src/walletPass/pass.ts). Each one is
   // switched on only once that wallet's issuer account and signing key are set up.
   walletPasses?: { apple?: boolean; google?: boolean; samsung?: boolean };
+  // Real-money test limits in US dollars (test app only; see src/send/smallMainnet.ts, which also
+  // caps them at $250 per action and $1,000 per day whatever this says).
+  testLimits?: { perActionUsd?: number; perDayUsd?: number };
 };
 
 const VERSION = /^\d+\.\d+\.\d+$/;
@@ -446,6 +449,18 @@ export function parseAppConfig(input: unknown): AppConfig {
       fail('testSwapFee must be a share between 0 and 0.01 (1%)');
     }
   }
+  let testLimits: AppConfig['testLimits'];
+  if (root.testLimits !== undefined) {
+    const l = root.testLimits as Record<string, unknown>;
+    if (!l || typeof l !== 'object' || Array.isArray(l)) fail('testLimits must be an object');
+    testLimits = {};
+    for (const [k, max] of [['perActionUsd', 250], ['perDayUsd', 1000]] as const) {
+      const v = l[k];
+      if (v === undefined) continue;
+      if (typeof v !== 'number' || !Number.isFinite(v) || v <= 0 || v > max) fail(`testLimits.${k} must be a number from 1 to ${max}`);
+      testLimits[k] = v;
+    }
+  }
   let walletPasses: AppConfig['walletPasses'];
   if (root.walletPasses !== undefined) {
     const w = root.walletPasses as Record<string, unknown>;
@@ -465,6 +480,7 @@ export function parseAppConfig(input: unknown): AppConfig {
     ...(realMoneyTesters?.length ? { realMoneyTesters } : {}),
     ...(testSwapFee ? { testSwapFee } : {}),
     ...(walletPasses && Object.keys(walletPasses).length ? { walletPasses } : {}),
+    ...(testLimits && Object.keys(testLimits).length ? { testLimits } : {}),
     ...(minVersion ? { minVersion } : {}),
     ...(root.updateMessage !== undefined ? { updateMessage: text(root.updateMessage, 'updateMessage', 300) } : {}),
   };

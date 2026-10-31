@@ -214,6 +214,14 @@ describe('app settings', () => {
     await expect(apply(form({ Action: 'Real-money tester', Change: 'Add', 'Wallet address': 'bc1qxyz' }))).rejects.toThrow(/0x/);
   });
 
+  it('sets the real-money test limits', async () => {
+    const r = await apply(form({ Action: 'Real-money test limits', 'Per action': '$100', 'Per day': '$500' }));
+    expect(config().testLimits).toEqual({ perActionUsd: 100, perDayUsd: 500 });
+    expect(r.summary).toMatch(/\$100 per action/);
+    await expect(apply(form({ Action: 'Real-money test limits', 'Per action': '$250', 'Per day': '$100' }))).rejects.toThrow(/per day/);
+    await expect(apply(form({ Action: 'Real-money test limits', 'Per action': '$5000', 'Per day': '$500' }))).rejects.toThrow(/Pick/);
+  });
+
   it('sets and clears the test swap fee', async () => {
     const r = await apply(form({ Action: 'Test swap fee', Fee: '0.5%' }));
     expect(config().testSwapFee).toBe(0.005);

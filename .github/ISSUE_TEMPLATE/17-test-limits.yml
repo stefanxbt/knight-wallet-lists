@@ -1,0 +1,38 @@
+name: Real-money test limits
+description: How much real-money testers can move in the test app, per action and per day. The app never allows more than $250 per action or $1,000 a day. Admins only.
+title: "Real-money test limits"
+body:
+  - type: dropdown
+    id: action
+    attributes:
+      label: Action
+      options:
+        - Real-money test limits
+      default: 0
+    validations:
+      required: true
+  - type: dropdown
+    id: per-action
+    attributes:
+      label: Per action
+      description: Most one send, swap, trade, bet or dApp action may be worth.
+      options:
+        - "$20"
+        - "$50"
+        - "$100"
+        - "$250"
+    validations:
+      required: true
+  - type: dropdown
+    id: per-day
+    attributes:
+      label: Per day
+      description: Most everything together may be worth in one day.
+      options:
+        - "$50"
+        - "$100"
+        - "$250"
+        - "$500"
+        - "$1000"
+    validations:
+      required: true
