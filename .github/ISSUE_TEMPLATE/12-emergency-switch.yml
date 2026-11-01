@@ -41,6 +41,7 @@ body:
         - Pro – themes, icons and Knight card
         - BlackFort ID sign-in (optional account)
         - Send feedback (shake or Settings > Help)
+        - Custom split and split a past payment
     validations:
       required: true
   - type: dropdown
