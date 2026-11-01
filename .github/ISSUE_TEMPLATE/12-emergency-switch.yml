@@ -32,6 +32,7 @@ body:
         - All coins list (Swap)
         - Cross-chain swaps
         - Move wallet to another phone (QR)
+        - Light mode and theme switcher
     validations:
       required: true
   - type: dropdown
