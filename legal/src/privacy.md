@@ -51,7 +51,7 @@ The Knight app does not use cookies. The built-in browser stores cookies for the
 - Alert registrations (push token and watched addresses): until you turn alerts off, or 12 months after your app last checked in.
 - Gateway and security logs at Cloudflare: up to 30 days. [CHECK: confirm Cloudflare log retention setting.]
 - Safety-check results: cached up to 24 hours, not linked to you.
-- Error reports at Sentry: up to 90 days. [CHECK: confirm Sentry data retention for the knight-wallet project.]
+- Error reports at Sentry: up to 90 days, then deleted automatically.
 - Emails: up to 2 years after the conversation ends.
 
 ## 7. Sharing
