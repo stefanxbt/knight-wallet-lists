@@ -31,6 +31,7 @@ body:
         - Ledger hardware wallet
         - All coins list (Swap)
         - Cross-chain swaps
+        - Move wallet to another phone (QR)
     validations:
       required: true
   - type: dropdown
