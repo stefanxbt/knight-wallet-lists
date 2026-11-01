@@ -103,15 +103,15 @@ describe('apply', async () => {
   });
 
   it('asks for the details when the network can not be read', async () => {
-    const r = apply(form({ Action: 'Add a token', Network: 'Solana', 'Contract address': 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN', Symbol: '_No response_', 'Token name': '_No response_', Decimals: '_No response_' }));
+    const r = apply(form({ Action: 'Add a token', Network: 'Solana', 'Contract address': 'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So', Symbol: '_No response_', 'Token name': '_No response_', Decimals: '_No response_' }));
     await expect(r).rejects.toThrow(/could not read Symbol, Token name, Decimals/);
   });
 
   it('adds a token and checks the address for its network', async () => {
-    const base = { Action: 'Add a token', Symbol: 'jup', 'Token name': 'Jupiter', Decimals: '6', 'CoinGecko ID': '_No response_' };
+    const base = { Action: 'Add a token', Symbol: 'msol', 'Token name': 'Marinade SOL', Decimals: '9', 'CoinGecko ID': '_No response_' };
     await expect(apply(form({ ...base, Network: 'Solana', 'Contract address': SCAM }))).rejects.toThrow(/valid solana address/);
-    await apply(form({ ...base, Network: 'Solana', 'Contract address': 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN' }));
-    expect(read('tokens.json').tokens.at(-1)).toEqual({ chain: 'solana', address: 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN', symbol: 'JUP', name: 'Jupiter', decimals: 6 });
+    await apply(form({ ...base, Network: 'Solana', 'Contract address': 'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So' }));
+    expect(read('tokens.json').tokens.at(-1)).toEqual({ chain: 'solana', address: 'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So', symbol: 'MSOL', name: 'Marinade SOL', decimals: 9 });
   });
 
   it('ignores issues that are not list forms', async () => {
