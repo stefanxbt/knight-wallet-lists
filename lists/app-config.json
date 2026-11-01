@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "issued": "2026-11-01T09:36:13.104Z",
+  "issued": "2026-11-01T11:14:57.365Z",
   "notices": [
     {
       "id": "beware-of-fake-support-please",
@@ -83,7 +83,8 @@
     "0x975c46a48b0103692309ad8d6083606f429c54a8",
     "0x92c184ab7c945185fc19e6ef7b38fc5ac2022b17",
     "0xde7f865555106f3a935f8973af69ccb5eb515845",
-    "0x0834869e1b5f4b2a746b72f6ae749c1799dac03b"
+    "0x0834869e1b5f4b2a746b72f6ae749c1799dac03b",
+    "0x68f01bcfd3a5f5d0659756d5260c4b54df5ac9bc"
   ],
   "testSwapFee": 0.005,
   "testLimits": {
