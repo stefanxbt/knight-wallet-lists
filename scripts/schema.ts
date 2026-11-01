@@ -175,10 +175,17 @@ export function parseDappList(input: unknown): DappList {
   return { version: 1, dapps };
 }
 
-export function parseTokenList(input: unknown): TokenList {
+// The app reads downloaded lists with skipUnknownChains, so a list that adds a network a newer
+// app knows about (for example Base) still loads in an older app, minus that network's rows.
+// The form robot checks strictly, so a typo in a network name is still refused.
+export type ParseOptions = { skipUnknownChains?: boolean };
+const knownChainsOnly = (raws: unknown[], key: string, opts: ParseOptions): unknown[] =>
+  opts.skipUnknownChains ? raws.filter((r) => !(r && typeof r === 'object' && typeof (r as Record<string, unknown>)[key] === 'string' && !isTokenChain((r as Record<string, unknown>)[key]))) : raws;
+
+export function parseTokenList(input: unknown, opts: ParseOptions = {}): TokenList {
   const root = object(input, 'token list');
   version(root);
-  const tokens = array(root.tokens, 'tokens').map((raw, i): ListedToken => {
+  const tokens = knownChainsOnly(array(root.tokens, 'tokens'), 'chain', opts).map((raw, i): ListedToken => {
     const t = object(raw, `tokens[${i}]`);
     const at = `tokens[${i}]`;
     const chain = tokenChain(t.chain, `${at}.chain`);
@@ -201,10 +208,10 @@ export function parseTokenList(input: unknown): TokenList {
   return { version: 1, tokens };
 }
 
-export function parseBlocklist(input: unknown): Blocklist {
+export function parseBlocklist(input: unknown, opts: ParseOptions = {}): Blocklist {
   const root = object(input, 'blocklist');
   version(root);
-  const tokens = array(root.tokens, 'tokens').map((raw, i): BlockedToken => {
+  const tokens = knownChainsOnly(array(root.tokens, 'tokens'), 'chain', opts).map((raw, i): BlockedToken => {
     const t = object(raw, `tokens[${i}]`);
     const chain = tokenChain(t.chain, `tokens[${i}].chain`);
     return {
@@ -214,7 +221,7 @@ export function parseBlocklist(input: unknown): Blocklist {
       added: date(t.added, `tokens[${i}].added`),
     };
   });
-  const nfts = array(root.nfts, 'nfts').map((raw, i): BlockedNft => {
+  const nfts = knownChainsOnly(array(root.nfts, 'nfts'), 'chain', opts).map((raw, i): BlockedNft => {
     const n = object(raw, `nfts[${i}]`);
     const chain = tokenChain(n.chain, `nfts[${i}].chain`);
     return {
