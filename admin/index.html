@@ -117,42 +117,15 @@ details summary { cursor: pointer; color: var(--blue); font-size: 14px; }
   </section>
 
   <section>
-    <div class="head"><h2>App features</h2></div>
-    <p class="note">Green works, amber works but slow or partly (one network down), red is down. From the last service check.</p>
-    <div class="tiles" id="features"></div>
-  </section>
-
-  <section>
     <div class="head"><h2>Users</h2></div>
     <div class="strip" id="users"></div>
     <p class="note">Knight Wallet keeps no accounts and sends nothing about wallets, so only anonymous totals can be counted. Test app downloads show here once builds are published to this page.</p>
   </section>
 
   <section>
-    <div class="head"><h2>Services</h2><a class="btn" id="check-now">Check now</a></div>
-    <p class="note" id="health-note">Loading the latest check…</p>
-    <ul id="health"></ul>
-  </section>
-
-  <section>
-    <div class="head"><h2>Feature switches</h2></div>
-    <p class="note">Show a feature to everyone, only to the real-money testers below, or hide it, without a new app build. Use it when something breaks or isn't released yet. Hidden means its buttons, rows and banners disappear; Sending and Swaps stay on screen and say they are paused. Phones pick a change up within about 5 minutes and remember it even without internet. New features start as testers only until you switch them on. This only shows or hides things: sending real money stays locked until the security audit, whatever this says. Admins only.</p>
-    <ul id="switches"></ul>
-  </section>
-
-  <section>
-    <div class="head"><h2>Countries</h2></div>
-    <ul id="regions"></ul>
-    <p class="note">Switch features off where they are not allowed. The app checks the phone's region and its internet connection, and the feature is off if either is a listed country. Admins only. Please check the country list with a lawyer.</p>
-  </section>
-
-  <section>
-    <div class="head"><h2>Real-money testers</h2><a class="btn primary" id="add-tester">+ Add tester</a></div>
-    <p class="note" id="test-fee"></p>
-    <p class="note" id="test-limits"></p>
-    <p class="note" id="pro-limit"></p>
-    <ul id="testers"></ul>
-    <p class="note">Only these wallets see the switch for real-money tests in the test app (limits below). Everyone else, including anyone who downloads the public test app, stays on test money. Add a wallet by its address (starts with 0x, shown under Receive). Admins only.</p>
+    <div class="head"><h2>App features</h2></div>
+    <p class="note">Green works, amber works but slow or partly (one network down), red is down. From the last service check.</p>
+    <div class="tiles" id="features"></div>
   </section>
 
   <section>
@@ -162,8 +135,41 @@ details summary { cursor: pointer; color: var(--blue); font-size: 14px; }
   </section>
 
   <section>
+    <div class="head"><h2>Real-money testers</h2><a class="btn primary" id="add-tester">+ Add tester</a></div>
+    <p class="note" id="test-fee"></p>
+    <p class="note" id="test-limits"></p>
+    <p class="note" id="pro-limit"></p>
+    <ul id="testers"></ul>
+    <p class="note">Only these wallets see the switch for real-money tests in the test app (limits above). Everyone else, including anyone who downloads the public test app, stays on test money. Add a wallet by its address (starts with 0x, shown under Receive). Admins only.</p>
+  </section>
+
+  <section>
+    <div class="head"><h2>Countries</h2></div>
+    <ul id="regions"></ul>
+    <p class="note">Switch features off where they are not allowed. The app checks the phone's region and its internet connection, and the feature is off if either is a listed country. Admins only. Please check the country list with a lawyer.</p>
+  </section>
+
+  <section>
+    <div class="head"><h2>Team</h2><a class="btn" href="https://github.com/stefanxbt/knight-wallet-lists/edit/main/team/roles.json">Edit team</a></div>
+    <p class="note">Admin: every change. Support: banners, messages, dApps and the scam blocklist. View: can look, cannot change anything. Anyone else's request waits for approval. Only admins can edit the team.</p>
+    <ul id="team"></ul>
+  </section>
+
+  <section>
     <div class="head"><h2>Banners</h2><a class="btn primary" id="add-banner">+ New banner</a></div>
     <ul id="banners"></ul>
+  </section>
+
+  <section>
+    <div class="head"><h2>Feature switches</h2></div>
+    <p class="note">Show a feature to everyone, only to the real-money testers (see Real-money testers above), or hide it, without a new app build. Use it when something breaks or isn't released yet. Hidden means its buttons, rows and banners disappear; Sending and Swaps stay on screen and say they are paused. Phones pick a change up within about 5 minutes and remember it even without internet. New features start as testers only until you switch them on. This only shows or hides things: sending real money stays locked until the security audit, whatever this says. Admins only.</p>
+    <ul id="switches"></ul>
+  </section>
+
+  <section>
+    <div class="head"><h2>Services</h2><a class="btn" id="check-now">Check now</a></div>
+    <p class="note" id="health-note">Loading the latest check…</p>
+    <ul id="health"></ul>
   </section>
 
   <section>
@@ -172,19 +178,13 @@ details summary { cursor: pointer; color: var(--blue); font-size: 14px; }
   </section>
 
   <section>
-    <div class="head"><h2>Tokens</h2><a class="btn primary" id="add-token">+ Add token</a></div>
-    <ul id="tokens"></ul>
-  </section>
-
-  <section>
     <div class="head"><h2>Scam blocklist</h2><a class="btn primary" id="block">+ Block a scam</a></div>
     <ul id="blocked"></ul>
   </section>
 
   <section>
-    <div class="head"><h2>Team</h2><a class="btn" href="https://github.com/stefanxbt/knight-wallet-lists/edit/main/team/roles.json">Edit team</a></div>
-    <p class="note">Admin: every change. Support: banners, messages, dApps and the scam blocklist. View: can look, cannot change anything. Anyone else's request waits for approval. Only admins can edit the team.</p>
-    <ul id="team"></ul>
+    <div class="head"><h2>Tokens</h2><a class="btn primary" id="add-token">+ Add token</a></div>
+    <ul id="tokens"></ul>
   </section>
 
   <section>
