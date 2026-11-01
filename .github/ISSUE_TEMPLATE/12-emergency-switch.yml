@@ -29,8 +29,8 @@ body:
         - Friends
         - Invite friends
         - Ledger hardware wallet
-        - 'Swap: All coins list'
-        - 'Swap: cross-chain'
+        - All coins list (Swap)
+        - Cross-chain swaps
     validations:
       required: true
   - type: dropdown

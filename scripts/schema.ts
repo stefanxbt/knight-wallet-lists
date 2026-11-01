@@ -348,8 +348,8 @@ export const APP_FEATURES = {
   friends: { label: 'Friends', standard: 'on' },
   invite: { label: 'Invite friends', standard: 'on' },
   ledger: { label: 'Ledger hardware wallet', standard: 'testers' },
-  allCoins: { label: 'Swap: All coins list', standard: 'testers' },
-  crossChain: { label: 'Swap: cross-chain', standard: 'testers' },
+  allCoins: { label: 'All coins list (Swap)', standard: 'testers' },
+  crossChain: { label: 'Cross-chain swaps', standard: 'testers' },
 } as const satisfies Record<string, { label: string; standard: FeatureState }>;
 export type AppFeature = keyof typeof APP_FEATURES;
 const isAppFeature = (key: string): key is AppFeature => Object.prototype.hasOwnProperty.call(APP_FEATURES, key);
