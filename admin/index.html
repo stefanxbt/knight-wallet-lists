@@ -142,6 +142,7 @@ details summary { cursor: pointer; color: var(--blue); font-size: 14px; }
     <div class="head"><h2>Real-money testers</h2><a class="btn primary" id="add-tester">+ Add tester</a></div>
     <p class="note" id="test-fee"></p>
     <p class="note" id="test-limits"></p>
+    <p class="note" id="pro-limit"></p>
     <ul id="testers"></ul>
     <p class="note">Only these wallets see the switch for real-money tests in the test app (limits below). Everyone else, including anyone who downloads the public test app, stays on test money. Add a wallet by its address (starts with 0x, shown under Receive). Admins only.</p>
   </section>
@@ -209,6 +210,11 @@ const FEATURES = [
   ['walletMove', 'Move wallet to another phone (QR)', 'testers'],
   ['lightMode', 'Light mode and theme switcher', 'testers'],
   ['solanaSwap', 'Swaps on Solana', 'testers'],
+  ['knightPro', 'Knight Pro (page and badge)', 'testers'],
+  ['proHalfFees', 'Pro – half swap fees', 'testers'],
+  ['proReports', 'Pro – reports and tax export', 'testers'],
+  ['proAlerts', 'Pro – alerts on watched wallets', 'testers'],
+  ['proThemes', 'Pro – themes, icons and Knight card', 'testers'],
 ];
 // Same rule as featureState in scripts/schema.ts.
 function featureState(config, key, standard) {
@@ -343,6 +349,9 @@ async function main() {
     btn('Change limits', form('17-test-limits.yml', { 'per-action': `$${perAction}`, 'per-day': `$${perDay}` })));
   const fee = config.testSwapFee ? `${+(config.testSwapFee * 100).toFixed(2)}%` : 'Off';
   document.getElementById('test-fee').replaceChildren(`Test swap fee for these wallets: ${fee}. `, btn('Change fee', form('16-test-swap-fee.yml', { fee })));
+  const proCap = config.proFeeCapUsd ?? 10000;
+  document.getElementById('pro-limit').replaceChildren(`Knight Pro half-fee limit: ${proCap ? `$${proCap.toLocaleString('en-US')} of swaps a month per member` : 'off'}. `,
+    btn('Change limit', form('18-pro-fee-limit.yml', { limit: proCap ? `$${proCap}` : '$0 (no half fee)' })));
   document.getElementById('add-banner').href = form('7-add-banner.yml');
   document.getElementById('add-dapp').href = form('1-add-dapp.yml');
   document.getElementById('add-token').href = form('3-add-token.yml');

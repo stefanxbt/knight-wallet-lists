@@ -365,6 +365,11 @@ export const APP_FEATURES = {
   walletMove: { label: 'Move wallet to another phone (QR)', standard: 'testers' },
   lightMode: { label: 'Light mode and theme switcher', standard: 'testers' },
   solanaSwap: { label: 'Swaps on Solana', standard: 'testers' },
+  knightPro: { label: 'Knight Pro (page and badge)', standard: 'testers' },
+  proHalfFees: { label: 'Pro – half swap fees', standard: 'testers' },
+  proReports: { label: 'Pro – reports and tax export', standard: 'testers' },
+  proAlerts: { label: 'Pro – alerts on watched wallets', standard: 'testers' },
+  proThemes: { label: 'Pro – themes, icons and Knight card', standard: 'testers' },
 } as const satisfies Record<string, { label: string; standard: FeatureState }>;
 export type AppFeature = keyof typeof APP_FEATURES;
 const isAppFeature = (key: string): key is AppFeature => Object.prototype.hasOwnProperty.call(APP_FEATURES, key);
@@ -414,6 +419,8 @@ export type AppConfig = {
   // Knight's LI.FI swap fee during the real-money test only (0.005 = 0.5%, at most 0.01), so the
   // team can check fees reach the fee wallet. Applies only to testers in the test app.
   testSwapFee?: number;
+  // Knight Pro pays half the swap fee on this many US dollars of swaps per month (default 10,000).
+  proFeeCapUsd?: number;
   // Which "Add to … Wallet" buttons Receive shows (see src/walletPass/pass.ts). Each one is
   // switched on only once that wallet's issuer account and signing key are set up.
   walletPasses?: { apple?: boolean; google?: boolean; samsung?: boolean };
@@ -520,6 +527,13 @@ export function parseAppConfig(input: unknown): AppConfig {
       fail('testSwapFee must be a share between 0 and 0.01 (1%)');
     }
   }
+  let proFeeCapUsd: number | undefined;
+  if (root.proFeeCapUsd !== undefined) {
+    proFeeCapUsd = root.proFeeCapUsd as number;
+    if (typeof proFeeCapUsd !== 'number' || !Number.isFinite(proFeeCapUsd) || proFeeCapUsd < 0 || proFeeCapUsd > 1_000_000) {
+      fail('proFeeCapUsd must be a number of dollars from 0 to 1,000,000');
+    }
+  }
   let testLimits: AppConfig['testLimits'];
   if (root.testLimits !== undefined) {
     const l = root.testLimits as Record<string, unknown>;
@@ -552,6 +566,7 @@ export function parseAppConfig(input: unknown): AppConfig {
     ...(regions ? { regions } : {}),
     ...(realMoneyTesters?.length ? { realMoneyTesters } : {}),
     ...(testSwapFee ? { testSwapFee } : {}),
+    ...(proFeeCapUsd !== undefined ? { proFeeCapUsd } : {}),
     ...(walletPasses && Object.keys(walletPasses).length ? { walletPasses } : {}),
     ...(testLimits && Object.keys(testLimits).length ? { testLimits } : {}),
     ...(minVersion ? { minVersion } : {}),

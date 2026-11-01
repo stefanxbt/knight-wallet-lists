@@ -34,6 +34,11 @@ body:
         - Move wallet to another phone (QR)
         - Light mode and theme switcher
         - Swaps on Solana
+        - Knight Pro (page and badge)
+        - Pro – half swap fees
+        - Pro – reports and tax export
+        - Pro – alerts on watched wallets
+        - Pro – themes, icons and Knight card
     validations:
       required: true
   - type: dropdown

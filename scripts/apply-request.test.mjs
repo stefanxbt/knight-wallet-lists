@@ -249,6 +249,15 @@ describe('app settings', () => {
     await expect(apply(form({ Action: 'Real-money test limits', 'Per action': '$5000', 'Per day': '$500' }))).rejects.toThrow(/Pick/);
   });
 
+  it('sets the Knight Pro half-fee limit', async () => {
+    const r = await apply(form({ Action: 'Knight Pro half-fee limit', 'Monthly limit': '$25000' }));
+    expect(read('app-config.json').proFeeCapUsd).toBe(25000);
+    expect(r.summary).toMatch(/\$25000/);
+    await apply(form({ Action: 'Knight Pro half-fee limit', 'Monthly limit': '$0 (no half fee)' }));
+    expect(read('app-config.json').proFeeCapUsd).toBe(0);
+    await expect(apply(form({ Action: 'Knight Pro half-fee limit', 'Monthly limit': '$9999999' }))).rejects.toThrow(/Pick/);
+  });
+
   it('sets and clears the test swap fee', async () => {
     const r = await apply(form({ Action: 'Test swap fee', Fee: '0.5%' }));
     expect(config().testSwapFee).toBe(0.005);

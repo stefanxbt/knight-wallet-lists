@@ -1,0 +1,28 @@
+name: Knight Pro half-fee limit
+description: How many US dollars of swaps a month Knight Pro members swap at half fee. After that the normal fee applies. Admins only.
+title: "Knight Pro half-fee limit"
+body:
+  - type: dropdown
+    id: action
+    attributes:
+      label: Action
+      options:
+        - Knight Pro half-fee limit
+      default: 0
+    validations:
+      required: true
+  - type: dropdown
+    id: limit
+    attributes:
+      label: Monthly limit
+      description: Swaps per member per calendar month that get the half fee.
+      options:
+        - "$0 (no half fee)"
+        - "$1000"
+        - "$5000"
+        - "$10000"
+        - "$25000"
+        - "$50000"
+        - "$100000"
+    validations:
+      required: true

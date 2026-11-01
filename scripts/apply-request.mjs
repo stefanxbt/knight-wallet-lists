@@ -551,6 +551,20 @@ function testLimits(fields) {
   };
 }
 
+const PRO_LIMITS = { '$0 (no half fee)': 0, $1000: 1000, $5000: 5000, $10000: 10000, $25000: 25000, $50000: 50000, $100000: 100000 };
+
+function proFeeLimit(fields) {
+  const config = parseAppConfig(read('app-config.json'));
+  const choice = field(fields, 'Monthly limit');
+  if (!(choice in PRO_LIMITS)) fail('Pick the limit from the list.');
+  config.proFeeCapUsd = PRO_LIMITS[choice];
+  write('app-config.json', parseAppConfig(config));
+  return {
+    summary: PRO_LIMITS[choice] ? `Knight Pro members now swap up to ${choice} a month at half fee.` : 'Knight Pro half fee is off: members pay the normal fee.',
+    commit: `Knight Pro half-fee limit ${choice}`,
+  };
+}
+
 function askToUpdate(fields) {
   const config = parseAppConfig(read('app-config.json'));
   const min = field(fields, 'Lowest version that is still fine', { optional: true });
@@ -587,6 +601,7 @@ const ACTIONS = {
   'Real-money tester': realMoneyTester,
   'Test swap fee': testSwapFee,
   'Real-money test limits': testLimits,
+  'Knight Pro half-fee limit': proFeeLimit,
 };
 
 export async function apply(body) {
