@@ -180,7 +180,12 @@ export function parseDappList(input: unknown): DappList {
 // The form robot checks strictly, so a typo in a network name is still refused.
 export type ParseOptions = { skipUnknownChains?: boolean };
 const knownChainsOnly = (raws: unknown[], key: string, opts: ParseOptions): unknown[] =>
-  opts.skipUnknownChains ? raws.filter((r) => !(r && typeof r === 'object' && typeof (r as Record<string, unknown>)[key] === 'string' && !isTokenChain((r as Record<string, unknown>)[key]))) : raws;
+  opts.skipUnknownChains ? raws.filter((r) => !isFutureChainRow(r, key)) : raws;
+// Only a well-formed network name counts as "a newer network"; anything odd still fails the list.
+const isFutureChainRow = (r: unknown, key: string): boolean => {
+  const chain = r && typeof r === 'object' ? (r as Record<string, unknown>)[key] : undefined;
+  return typeof chain === 'string' && /^[a-z0-9-]{2,20}$/.test(chain) && !isTokenChain(chain);
+};
 
 export function parseTokenList(input: unknown, opts: ParseOptions = {}): TokenList {
   const root = object(input, 'token list');
