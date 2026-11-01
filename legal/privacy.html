@@ -96,6 +96,13 @@ th{background:var(--card)}footer{margin-top:48px;color:var(--muted);font-size:13
 <td>Contract</td>
 </tr>
 <tr>
+<td>Error reports: what went wrong (error text and code location), app version, phone model and system version</td>
+<td>When the app hits an error, unless you turn reports off in Settings &gt; Security &gt; Send error reports</td>
+<td>Sentry (Functional Software, Inc.), stored in the EU (Germany)</td>
+<td>To find and fix bugs</td>
+<td>Legitimate interest (you can opt out at any time)</td>
+</tr>
+<tr>
 <td>Messages you send us</td>
 <td>Only if you email us</td>
 <td>Our email provider</td>
@@ -117,7 +124,7 @@ th{background:var(--card)}footer{margin-top:48px;color:var(--muted);font-size:13
 <h2>3. What stays only on your phone</h2>
 <p>Recovery phrase, private keys, PIN, address book, wallet names, settings, transaction notes, Ledger pairing and your list of approved testers or contacts stay on your device. Deleting the app removes them. Backups of the encrypted wallet may exist in your own phone backup if your phone is set to do so.</p>
 <h2>4. What we do not do</h2>
-<p>We do not use analytics or crash-reporting tools today, we do not use advertising IDs, we do not build profiles, and we do not sell or rent personal data. If we add analytics or crash reports later, we will update this policy and the store privacy labels first and ask for consent where the law requires it.</p>
+<p>We do not use analytics or ad tracking, we do not use advertising IDs, we do not build profiles, and we do not sell or rent personal data. The only diagnostics are the error reports above: before a report leaves your phone, Knight removes recovery phrases, private keys, wallet addresses, transaction hashes, sign-in tokens and email addresses, and it never attaches screenshots or a user profile. Like any internet request, Sentry sees the connection's IP address; Knight does not ask it to store it with the report. You can turn reports off in Settings &gt; Security &gt; Send error reports. If we add analytics later, we will update this policy and the store privacy labels first and ask for consent where the law requires it.</p>
 <h2>5. Cookies</h2>
 <p>The Knight app does not use cookies. The built-in browser stores cookies for the websites you visit, as any browser does; those websites decide what they store. Our public web pages (such as this one) do not use tracking cookies.</p>
 <h2>6. How long we keep data</h2>
@@ -125,10 +132,11 @@ th{background:var(--card)}footer{margin-top:48px;color:var(--muted);font-size:13
 <li>Alert registrations (push token and watched addresses): until you turn alerts off, or 12 months after your app last checked in.</li>
 <li>Gateway and security logs at Cloudflare: up to 30 days. [CHECK: confirm Cloudflare log retention setting.]</li>
 <li>Safety-check results: cached up to 24 hours, not linked to you.</li>
+<li>Error reports at Sentry: up to 90 days. [CHECK: confirm Sentry data retention for the knight-wallet project.]</li>
 <li>Emails: up to 2 years after the conversation ends.</li>
 </ul>
 <h2>7. Sharing</h2>
-<p>We share data only with the service providers listed above, to run Knight, and with authorities when the law requires it. Our main providers are Cloudflare (hosting and gateway), Google Firebase (push messages), Alchemy (blockchain data), GoPlus (safety checks) and GitHub (public lists). Each provider must protect data at least as well as this policy requires.</p>
+<p>We share data only with the service providers listed above, to run Knight, and with authorities when the law requires it. Our main providers are Cloudflare (hosting and gateway), Google Firebase (push messages), Alchemy (blockchain data), GoPlus (safety checks), Sentry (error reports, EU) and GitHub (public lists). Each provider must protect data at least as well as this policy requires.</p>
 <h2>8. International transfers</h2>
 <p>Our providers work in many countries, including the United States. Where EU or UK law applies, we rely on the European Commission's Standard Contractual Clauses or other approved safeguards.</p>
 <h2>9. Your rights</h2>
