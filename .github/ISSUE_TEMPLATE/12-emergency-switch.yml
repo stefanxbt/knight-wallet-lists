@@ -40,6 +40,7 @@ body:
         - Pro – alerts on watched wallets
         - Pro – themes, icons and Knight card
         - BlackFort ID sign-in (optional account)
+        - Send feedback (shake or Settings > Help)
     validations:
       required: true
   - type: dropdown

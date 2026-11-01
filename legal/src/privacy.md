@@ -25,6 +25,7 @@ This policy explains what personal data Knight Wallet ("Knight") handles, why, a
 | Feature lists and settings | Each time Knight opens | GitHub (where our public lists are hosted), through our Cloudflare cache | To show tokens, dApps, scam lists and switches | Legitimate interest |
 | Knight Pro purchase status | Only if you subscribe | Apple App Store or Google Play | To give you Pro features | Contract |
 | Error reports: what went wrong (error text and code location), app version, phone model and system version | When the app hits an error, unless you turn reports off in Settings > Security > Send error reports | Sentry (Functional Software, Inc.), stored in the EU (Germany) | To find and fix bugs | Legitimate interest (you can opt out at any time) |
+| Feedback you send from the app (test builds): your words, a category, an optional name, an optional screenshot you choose to add, and the same app and phone details as error reports | Only when you tap Send in Send feedback (shake the phone or Settings > Help) | Sentry (Functional Software, Inc.), stored in the EU (Germany) | To fix what testers report | Consent (you choose what to send, and nothing is sent unless you tap Send) |
 | Messages you send us | Only if you email us | Our email provider | To answer you | Legitimate interest |
 | BlackFort ID account: name, email, account number and sign-in tokens | Only if you choose to sign in with BlackFort ID | BlackFort ID, run by BlackFort (a separate company), which holds your account. Knight keeps the sign-in tokens, your name and your email only on your phone | To sign you in to optional account features | Consent (you can sign out at any time) |
 
@@ -40,7 +41,7 @@ Recovery phrase, private keys, PIN, address book, wallet names, settings, transa
 
 ## 4. What we do not do
 
-We do not use analytics or ad tracking, we do not use advertising IDs, we do not build profiles, and we do not sell or rent personal data. The only diagnostics are the error reports above: before a report leaves your phone, Knight removes recovery phrases, private keys, wallet addresses, transaction hashes, sign-in tokens and email addresses, and it never attaches screenshots or a user profile. Like any internet request, Sentry sees the connection's IP address; Knight does not ask it to store it with the report. You can turn reports off in Settings > Security > Send error reports. If we add analytics later, we will update this policy and the store privacy labels first and ask for consent where the law requires it.
+We do not use analytics or ad tracking, we do not use advertising IDs, we do not build profiles, and we do not sell or rent personal data. The only diagnostics are the error reports above: before a report leaves your phone, Knight removes recovery phrases, private keys, wallet addresses, transaction hashes, sign-in tokens and email addresses, and it never attaches a user profile. Error reports never include screenshots; feedback includes one only when you tick "Add a screenshot", and you see it before it is sent. A screenshot can show what was on screen (for example a balance or an address), so leave it off if you prefer. Like any internet request, Sentry sees the connection's IP address; Knight does not ask it to store it with the report. You can turn reports off in Settings > Security > Send error reports. If we add analytics later, we will update this policy and the store privacy labels first and ask for consent where the law requires it.
 
 ## 5. Cookies
 
@@ -51,7 +52,7 @@ The Knight app does not use cookies. The built-in browser stores cookies for the
 - Alert registrations (push token and watched addresses): until you turn alerts off, or 12 months after your app last checked in.
 - Gateway and security logs at Cloudflare: up to 30 days. [CHECK: confirm Cloudflare log retention setting.]
 - Safety-check results: cached up to 24 hours, not linked to you.
-- Error reports at Sentry: up to 90 days, then deleted automatically.
+- Error reports and feedback at Sentry: up to 90 days, then deleted automatically.
 - Emails: up to 2 years after the conversation ends.
 
 ## 7. Sharing
