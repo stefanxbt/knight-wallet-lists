@@ -14,9 +14,14 @@
   "regions": {
     "hyperliquidTrade": {
       "blocked": [
+        "BY",
+        "CA",
         "CU",
+        "GB",
         "IR",
         "KP",
+        "MM",
+        "RU",
         "SY",
         "US"
       ],
@@ -24,15 +29,54 @@
     },
     "predictions": {
       "blocked": [
+        "BY",
         "CU",
         "FR",
         "GB",
         "IR",
         "KP",
+        "MM",
+        "RU",
         "SY",
         "US"
       ],
       "unknownOff": true
+    },
+    "swap": {
+      "blocked": [
+        "BY",
+        "CU",
+        "IR",
+        "KP",
+        "MM",
+        "RU",
+        "SY"
+      ],
+      "unknownOff": false
+    },
+    "dappBrowser": {
+      "blocked": [
+        "BY",
+        "CU",
+        "IR",
+        "KP",
+        "MM",
+        "RU",
+        "SY"
+      ],
+      "unknownOff": false
+    },
+    "walletconnect": {
+      "blocked": [
+        "BY",
+        "CU",
+        "IR",
+        "KP",
+        "MM",
+        "RU",
+        "SY"
+      ],
+      "unknownOff": false
     }
   },
   "realMoneyTesters": [
