@@ -510,6 +510,17 @@ const shortAmount = (n) => (n >= 1 ? n.toLocaleString(undefined, { maximumFracti
 // Knight's own share of a swap: LI.FI lists it among the fee costs as the integrator fee.
 const knightFeeOf = (t) => (t.feeCosts ?? []).filter((f) => /integrator/i.test(`${f.name} ${f.description}`)).reduce((sum, f) => sum + Number(f.amountUSD ?? 0), 0);
 
+// Only ever links to LI.FI's own explorer: the link LI.FI gives if it really is scan.li.fi, else one
+// built from a transaction hash that looks like one (EVM hex or Solana base58).
+function explorerLink(t) {
+  try {
+    const u = new URL(t.lifiExplorerLink ?? '');
+    if (u.protocol === 'https:' && u.host === 'scan.li.fi') return u.href;
+  } catch {}
+  const hash = t.sending?.txHash ?? '';
+  return /^0x[0-9a-fA-F]{64}$/.test(hash) || /^[1-9A-HJ-NP-Za-km-z]{64,90}$/.test(hash) ? `https://scan.li.fi/tx/${hash}` : null;
+}
+
 async function getJsonFrom(url, init) {
   const r = await fetch(url, { cache: 'no-store', ...init });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -573,7 +584,7 @@ async function earnings(config) {
       const when = s.timestamp ? new Date(s.timestamp * 1000).toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
       const k = knightFeeOf(t);
       return row(what, `${route} · ${when} · Knight fee ${k > 0 ? usd(k) : 'none'}`, pill(...(STATUS[t.status] ?? [t.status ?? '?', 'off'])),
-        /^https:\/\//.test(t.lifiExplorerLink ?? '') ? btn('Explorer', t.lifiExplorerLink) : null);
+        explorerLink(t) ? btn('Explorer', explorerLink(t)) : null);
     }), 'No swaps in the last 30 days.');
     document.getElementById('earn-swaps-box').hidden = false;
   } else {
