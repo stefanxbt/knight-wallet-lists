@@ -39,6 +39,7 @@ body:
         - Pro – reports and tax export
         - Pro – alerts on watched wallets
         - Pro – themes, icons and Knight card
+        - BlackFort ID sign-in (optional account)
     validations:
       required: true
   - type: dropdown

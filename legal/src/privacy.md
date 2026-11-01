@@ -6,7 +6,7 @@ This policy explains what personal data Knight Wallet ("Knight") handles, why, a
 
 ## 1. The short version
 
-- **No account, no sign-up, no name, no email, no phone number.** You use Knight without telling us who you are.
+- **No account needed, no sign-up, no name, no email, no phone number.** You use Knight without telling us who you are. Signing in with a BlackFort ID is optional (see below).
 - **Your recovery phrase and private keys never leave your device.** We cannot see them.
 - **No ads, no ad tracking, no selling of data.** Knight does not track you across other apps or websites.
 - To work, Knight has to send **public wallet addresses** and some technical data (such as your IP address) to blockchain and service providers. This section explains each one.
@@ -25,8 +25,11 @@ This policy explains what personal data Knight Wallet ("Knight") handles, why, a
 | Feature lists and settings | Each time Knight opens | GitHub (where our public lists are hosted), through our Cloudflare cache | To show tokens, dApps, scam lists and switches | Legitimate interest |
 | Knight Pro purchase status | Only if you subscribe | Apple App Store or Google Play | To give you Pro features | Contract |
 | Messages you send us | Only if you email us | Our email provider | To answer you | Legitimate interest |
+| BlackFort ID account: name, email, account number and sign-in tokens | Only if you choose to sign in with BlackFort ID | BlackFort ID, run by BlackFort (a separate company), which holds your account. Knight keeps the sign-in tokens, your name and your email only on your phone | To sign you in to optional account features | Consent (you can sign out at any time) |
 
 **Card purchases (Ramp, MoonPay).** When you buy or sell crypto with a card or bank transfer, the provider collects your identity and payment details itself, under its own privacy policy. We do not receive your card number or ID documents.
+
+**BlackFort ID (optional).** If you sign in with BlackFort ID, you type your password on BlackFort's own page, not in Knight. BlackFort is an independent controller of your account data under its own privacy notice. Knight does not send your wallet addresses, keys or recovery phrase to BlackFort ID, and your wallet works fully without an account. Signing out deletes the sign-in tokens from your phone and asks BlackFort ID to cancel them.
 
 **dApps and WalletConnect.** When you connect a dApp, that dApp and the WalletConnect relay see your public address and the requests you approve. They are independent controllers.
 

@@ -18,5 +18,6 @@ Knight is software. These services are run by independent companies or open prot
 | GoPlus Security, Dyrection Shield | Scam and token safety checks | GoPlus; Dyrection | See [Safety checks](shield.html) |
 | Google Firebase, Apple Push | Delivering alerts | Google, Apple | Their own terms |
 | Cloudflare | Hosting our gateway and alerts service | Cloudflare | Their own terms |
+| BlackFort ID (optional) | Sign-in to an optional account. Never holds your keys, coins or wallet addresses | BlackFort | Shown on its sign-in page |
 
 Dyrection is not responsible for these services, their prices, their availability or any loss they cause. A listing in Knight is not an endorsement.
