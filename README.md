@@ -21,6 +21,12 @@ repo every time it opens, so a change reaches phones without a new app build.
 Nothing about users is ever sent here. These are public lists that every phone
 downloads the same way, which keeps the wallet non-custodial.
 
+## Legal pages
+
+The public legal pages (Terms, Privacy, Risks, Fees, Restricted countries and more) live in
+`legal/` and are served at https://stefanxbt.github.io/knight-wallet-lists/legal/. Edit the
+Markdown in `legal/src/`, then run `pip install markdown && python3 scripts/build-legal.py`.
+
 ## Admin panel
 
 **[Open the admin panel](https://stefanxbt.github.io/knight-wallet-lists/admin/)**

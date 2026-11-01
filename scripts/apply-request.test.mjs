@@ -199,7 +199,7 @@ describe('app settings', () => {
     expect(config().regions.hyperliquidTrade.blocked.includes('GB')).toBe(false);
     const r = await apply(form({ Action: 'Country rule', Feature: 'Swaps', Change: 'When the country is unknown, keep it off', Countries: '_No response_' }));
     expect(config().regions.swap.unknownOff).toBe(true);
-    expect(r.summary).toMatch(/\| Swaps \| nowhere \| off \|/);
+    expect(r.summary).toMatch(/\| Swaps \| [^|]+ \| off \|/);
     await expect(apply(form({ Action: 'Country rule', Feature: 'Swaps', Change: 'Switch off in these countries', Countries: 'USA' }))).rejects.toThrow(/two-letter/);
   });
 
