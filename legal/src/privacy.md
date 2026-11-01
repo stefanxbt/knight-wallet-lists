@@ -18,6 +18,7 @@ This policy explains what personal data Knight Wallet ("Knight") handles, why, a
 | Public wallet addresses and balances you look up | Every time Knight loads balances, history or prices | Blockchain data providers (Alchemy, public RPC nodes, block explorers, Solana, Tron and BlackFort nodes, mempool.space) | To show your balances and history and to send your signed transactions | Contract (providing the app) |
 | Swap, bridge and trade requests (tokens, amounts, addresses) | When you ask for a quote or trade | LI.FI and the routes it uses; Jupiter; Hyperliquid; Polymarket. Swap quotes may pass through our gateway (Cloudflare) | To get prices and prepare the transaction you sign | Contract |
 | Push token and the addresses you choose to watch | Only if you turn on alerts | Our alerts service on Cloudflare; Google Firebase Cloud Messaging; Apple Push Notification service; Alchemy (for transfer notices) | To send you alerts about incoming funds, prices and new app versions | Consent (you can turn alerts off at any time) |
+| Watched wallets you turn alerts on for: the public address and your push token | Only if you turn on alerts for a watched wallet | Our alerts service on Cloudflare; Google Firebase Cloud Messaging; Apple Push Notification service; Alchemy (for transfer notices) | To tell you when money moves in or out of that wallet. The wallet's name stays on your phone | Consent (you can turn these alerts off at any time) |
 | Token, address and website safety lookups | When you open a token, a link or a transaction to sign | Dyrection Shield, GoPlus Security (through our gateway) | To warn you about scams | Legitimate interest (your safety) |
 | Country of your internet connection and your phone's region setting | When features that are limited by country open | Cloudflare (public trace page); Polymarket (its own location check) | To switch off features that are not allowed where you are, and to meet sanctions laws | Legal obligation and legitimate interest |
 | IP address and basic request data (time, app version) | Any time Knight contacts a server | Every server Knight contacts, including ours on Cloudflare | Needed for the internet to work; short-lived security logs | Legitimate interest |
@@ -50,6 +51,7 @@ The Knight app does not use cookies. The built-in browser stores cookies for the
 ## 6. How long we keep data
 
 - Alert registrations (push token and watched addresses): until you turn alerts off, or 12 months after your app last checked in.
+- Watched wallets you turn alerts on for (public address and push token): until you turn those alerts off, or the app is removed from your phone.
 - Gateway and security logs at Cloudflare: up to 30 days. [CHECK: confirm Cloudflare log retention setting.]
 - Safety-check results: cached up to 24 hours, not linked to you.
 - Error reports and feedback at Sentry: up to 90 days, then deleted automatically.
