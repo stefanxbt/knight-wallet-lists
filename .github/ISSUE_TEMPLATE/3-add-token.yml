@@ -19,6 +19,9 @@ body:
         - Ethereum
         - BNB Chain
         - Polygon
+        - Base
+        - Arbitrum
+        - Optimism
         - BlackFort
         - Solana
         - Tron

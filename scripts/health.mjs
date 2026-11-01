@@ -19,6 +19,12 @@ export const SERVICES = [
   ['networks', 'BNB Chain test', 'Test sending', evm('https://bsc-testnet-rpc.publicnode.com')],
   ['networks', 'Polygon', 'Balances and sending', evm('https://polygon-bor-rpc.publicnode.com')],
   ['networks', 'Polygon Amoy (test)', 'Test sending', evm('https://polygon-amoy-bor-rpc.publicnode.com')],
+  ['networks', 'Base', 'Balances and sending', evm('https://base-rpc.publicnode.com')],
+  ['networks', 'Base Sepolia (test)', 'Test sending', evm('https://base-sepolia-rpc.publicnode.com')],
+  ['networks', 'Arbitrum', 'Balances and sending', evm('https://arbitrum-one-rpc.publicnode.com')],
+  ['networks', 'Arbitrum Sepolia (test)', 'Test sending', evm('https://arbitrum-sepolia-rpc.publicnode.com')],
+  ['networks', 'Optimism', 'Balances and sending', evm('https://optimism-rpc.publicnode.com')],
+  ['networks', 'OP Sepolia (test)', 'Test sending', evm('https://optimism-sepolia-rpc.publicnode.com')],
   ['networks', 'BlackFort', 'BXN balances and sending', evm('https://rpc.blackfort.network/mainnet/rpc')],
   ['networks', 'BlackFort test', 'Test sending', evm('https://rpc.blackfort.network/testnet/rpc')],
   ['networks', 'BlackFortScan', 'Backup for BXN balances', { url: 'https://blackfortscan.com/api?module=block&action=eth_block_number', ok: (b) => typeof b.result === 'string' }],
@@ -45,8 +51,8 @@ export const SERVICES = [
 // What each app feature needs. "all": every service must work; "any": works while at least
 // one does (balances still show for the other chains if one is down).
 export const FEATURES = [
-  ['Balances', 'any', ['Ethereum', 'BNB Chain', 'Polygon', 'BlackFort', 'HyperEVM', 'Solana', 'Bitcoin (mempool.space)', 'Tron (TronGrid)']],
-  ['Test sending', 'any', ['Ethereum Sepolia (test)', 'BNB Chain test', 'Polygon Amoy (test)', 'BlackFort test', 'HyperEVM test', 'Solana devnet (test)', 'Bitcoin testnet4', 'Tron Nile (test)']],
+  ['Balances', 'any', ['Ethereum', 'BNB Chain', 'Polygon', 'Base', 'Arbitrum', 'Optimism', 'BlackFort', 'HyperEVM', 'Solana', 'Bitcoin (mempool.space)', 'Tron (TronGrid)']],
+  ['Test sending', 'any', ['Ethereum Sepolia (test)', 'BNB Chain test', 'Polygon Amoy (test)', 'Base Sepolia (test)', 'Arbitrum Sepolia (test)', 'OP Sepolia (test)', 'BlackFort test', 'HyperEVM test', 'Solana devnet (test)', 'Bitcoin testnet4', 'Tron Nile (test)']],
   ['Prices and charts', 'all', ['CoinGecko']],
   ['Profit and loss', 'all', ['DefiLlama']],
   ['Other currencies', 'all', ['Exchange rates (open.er-api.com)']],

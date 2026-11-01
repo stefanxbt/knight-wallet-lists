@@ -4,11 +4,11 @@
 // It has no imports so it runs under plain Node (scripts/apply-request.mjs).
 // Keep it to type-erasable TypeScript: no enums, no namespaces.
 
-export const LIST_CHAINS = ['bitcoin', 'ethereum', 'bsc', 'polygon', 'blackfort', 'hyperevm', 'solana', 'tron'] as const;
+export const LIST_CHAINS = ['bitcoin', 'ethereum', 'bsc', 'polygon', 'base', 'arbitrum', 'optimism', 'blackfort', 'hyperevm', 'solana', 'tron'] as const;
 export type ListChain = (typeof LIST_CHAINS)[number];
 
 // Chains that have tokens and NFTs at a contract address.
-export const TOKEN_CHAINS = ['ethereum', 'bsc', 'polygon', 'blackfort', 'hyperevm', 'solana', 'tron'] as const;
+export const TOKEN_CHAINS = ['ethereum', 'bsc', 'polygon', 'base', 'arbitrum', 'optimism', 'blackfort', 'hyperevm', 'solana', 'tron'] as const;
 export type TokenChain = (typeof TOKEN_CHAINS)[number];
 
 export const DAPP_CATEGORIES = ['exchange', 'lending', 'staking', 'nft', 'other'] as const;

@@ -55,6 +55,9 @@ body:
         - label: Ethereum
         - label: BNB Chain
         - label: Polygon
+        - label: Base
+        - label: Arbitrum
+        - label: Optimism
         - label: BlackFort
         - label: Solana
         - label: Tron
