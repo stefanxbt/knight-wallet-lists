@@ -343,7 +343,7 @@ export const APP_FEATURES = {
   hyperliquid: { label: 'Hyperliquid trading', standard: 'on' },
   predictions: { label: 'Predictions (Polymarket)', standard: 'on' },
   sendByLink: { label: 'Send by link', standard: 'on' },
-  tapToPay: { label: 'Tap to pay (NFC)', standard: 'on' },
+  tapToPay: { label: 'Tap to pay (NFC)', standard: 'testers' },
   requests: { label: 'Payment requests', standard: 'on' },
   friends: { label: 'Friends', standard: 'on' },
   invite: { label: 'Invite friends', standard: 'on' },
