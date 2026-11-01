@@ -108,6 +108,14 @@ details summary { cursor: pointer; color: var(--blue); font-size: 14px; }
     <p class="note" id="apk-note">The newest Android test app. Its publish time shows here once test builds are published to this page (needs the LISTS_TOKEN secret).</p>
   </section>
 
+  <section id="earnings">
+    <div class="head"><h2>Earnings</h2><div class="actions"><a class="btn" href="https://portal.li.fi/">LI.FI portal</a><a class="btn" href="https://app.hyperliquid.xyz/referrals">Hyperliquid rewards</a></div></div>
+    <p class="note" id="earn-note">Loading swap fees from LI.FI and trading fees from Hyperliquid…</p>
+    <div class="strip" id="earn-strip"></div>
+    <details id="earn-chains-box" hidden><summary>Swap fees by network</summary><ul id="earn-chains"></ul></details>
+    <details id="earn-swaps-box" hidden><summary>Latest swaps (30 days)</summary><ul id="earn-swaps"></ul></details>
+  </section>
+
   <section>
     <div class="head"><h2>App features</h2></div>
     <p class="note">Green works, amber works but slow or partly (one network down), red is down. From the last service check.</p>
@@ -490,13 +498,133 @@ async function team() {
 }
 team();
 
+// Earnings, read live from LI.FI (swap fees, integrator knight-wallet) and Hyperliquid (builder fees
+// to Knight's fee wallet). Both are public read-only lookups; no key is used or needed here.
+const LIFI_INTEGRATOR = 'knight-wallet';
+const HL_FEE_WALLET = '0x92c184aB7c945185Fc19E6ef7b38Fc5Ac2022b17';
+const HL_BUILDER_MIN = 100; // Hyperliquid only pays a builder whose perps account holds at least 100 USDC.
+const CHAIN_NAME = { 1: 'Ethereum', 56: 'BNB Chain', 137: 'Polygon', 8453: 'Base', 42161: 'Arbitrum', 10: 'Optimism', 1151111081099710: 'Solana', 728126428: 'Tron' };
+const chainName = (id) => CHAIN_NAME[id] ?? `Chain ${id}`;
+const usd = (n) => (n > 0 && n < 0.01 ? '<$0.01' : `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+const tokenAmount = (amount, token) => Number(amount ?? 0) / 10 ** (token?.decimals ?? 18);
+const shortAmount = (n) => (n >= 1 ? n.toLocaleString(undefined, { maximumFractionDigits: 4 }) : String(Number(n.toPrecision(3))));
+// Knight's own share of a swap: LI.FI lists it among the fee costs as the integrator fee.
+const knightFeeOf = (t) => (t.feeCosts ?? []).filter((f) => /integrator/i.test(`${f.name} ${f.description}`)).reduce((sum, f) => sum + Number(f.amountUSD ?? 0), 0);
+
+// Only ever links to LI.FI's own explorer: the link LI.FI gives if it really is scan.li.fi, else one
+// built from a transaction hash that looks like one (EVM hex or Solana base58).
+function explorerLink(t) {
+  try {
+    const u = new URL(t.lifiExplorerLink ?? '');
+    if (u.protocol === 'https:' && u.host === 'scan.li.fi') return u.href;
+  } catch {}
+  const hash = t.sending?.txHash ?? '';
+  return /^0x[0-9a-fA-F]{64}$/.test(hash) || /^[1-9A-HJ-NP-Za-km-z]{64,90}$/.test(hash) ? `https://scan.li.fi/tx/${hash}` : null;
+}
+
+async function getJsonFrom(url, init) {
+  const r = await fetch(url, { cache: 'no-store', ...init });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+const hlInfo = (body) => getJsonFrom('https://api.hyperliquid.xyz/info', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+
+function needsYou(item) {
+  const list = document.getElementById('attention-list');
+  if (list.querySelector('.empty') || !list.textContent.trim()) list.replaceChildren();
+  list.append(item);
+  document.getElementById('attention').hidden = false;
+}
+
+async function earnings(config) {
+  const stat = (n, label, cls = '') => el('div', { class: `stat ${cls}` }, el('b', { text: n }), el('small', { text: label }));
+  const stats = [];
+  const problems = [];
+  const fee = config?.testSwapFee;
+  const rule = fee
+    ? `Swap fee now: ${fee * 100}% (Knight Pro pays half), only for signed real-money testers. Everyone else pays no Knight fee until the audit.`
+    : 'Swap fee now: none (no test fee set). Everyone else pays no Knight fee until the audit.';
+
+  const [balances, transfers, hlState, hlReferral] = await Promise.allSettled([
+    getJsonFrom(`https://li.quest/v1/integrators/${LIFI_INTEGRATOR}`),
+    getJsonFrom(`https://li.quest/v2/analytics/transfers?${new URLSearchParams({ integrator: LIFI_INTEGRATOR, status: 'ALL', limit: '100', fromTimestamp: String(Math.floor(Date.now() / 1000) - 30 * 86400) })}`),
+    hlInfo({ type: 'clearinghouseState', user: HL_FEE_WALLET }),
+    hlInfo({ type: 'referral', user: HL_FEE_WALLET }),
+  ]);
+
+  // LI.FI: fees collected and waiting to be withdrawn on portal.li.fi, per network.
+  if (balances.status === 'fulfilled') {
+    const chains = (balances.value.feeBalances ?? []).map((c) => ({
+      chainId: c.chainId,
+      tokens: (c.tokenBalances ?? []).filter((b) => Number(b.amount) > 0),
+    })).filter((c) => c.tokens.length);
+    const total = chains.flatMap((c) => c.tokens).reduce((sum, b) => sum + Number(b.amountUsd ?? 0), 0);
+    stats.push(stat(usd(total), 'swap fees to withdraw (LI.FI)', total > 0 ? 'ok' : ''));
+    fill('earn-chains', chains.map((c) => row(chainName(c.chainId),
+      c.tokens.map((b) => `${shortAmount(tokenAmount(b.amount, b.token))} ${b.token.symbol} (${usd(Number(b.amountUsd ?? 0))})`).join(', '),
+      null)), 'No swap fees collected yet.');
+    document.getElementById('earn-chains-box').hidden = false;
+  } else {
+    problems.push(`LI.FI fee balances could not be loaded (${balances.reason.message}); the LI.FI portal shows them too.`);
+  }
+
+  // LI.FI: the swaps made through Knight Wallet in the last 30 days.
+  if (transfers.status === 'fulfilled') {
+    const list = transfers.value.data ?? [];
+    const done = list.filter((t) => t.status === 'DONE');
+    const volume = done.reduce((sum, t) => sum + tokenAmount(t.sending?.amount, t.sending?.token) * Number(t.sending?.token?.priceUSD ?? 0), 0);
+    const knight = done.reduce((sum, t) => sum + knightFeeOf(t), 0);
+    stats.push(stat(`${done.length}${transfers.value.hasNext ? '+' : ''}`, 'swaps done (30 days)'));
+    stats.push(stat(usd(volume), 'swap volume (30 days)'));
+    stats.push(stat(usd(knight), 'Knight fee in those swaps', knight > 0 ? 'ok' : ''));
+    const STATUS = { DONE: ['Done', 'on'], PENDING: ['On the way', 'wait'], FAILED: ['Failed', 'crit'] };
+    fill('earn-swaps', list.slice(0, 25).map((t) => {
+      const s = t.sending ?? {}, r = t.receiving ?? {};
+      const what = `${shortAmount(tokenAmount(s.amount, s.token))} ${s.token?.symbol ?? '?'} → ${r.token?.symbol ?? '?'}`;
+      const route = s.chainId === r.chainId || !r.chainId ? chainName(s.chainId) : `${chainName(s.chainId)} → ${chainName(r.chainId)}`;
+      const when = s.timestamp ? new Date(s.timestamp * 1000).toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+      const k = knightFeeOf(t);
+      return row(what, `${route} · ${when} · Knight fee ${k > 0 ? usd(k) : 'none'}`, pill(...(STATUS[t.status] ?? [t.status ?? '?', 'off'])),
+        explorerLink(t) ? btn('Explorer', explorerLink(t)) : null);
+    }), 'No swaps in the last 30 days.');
+    document.getElementById('earn-swaps-box').hidden = false;
+  } else {
+    problems.push(`LI.FI swaps could not be loaded (${transfers.reason.message}).`);
+  }
+
+  // Hyperliquid: builder fees earned (claimable on the referrals page), and whether the fee code
+  // works at all (the fee wallet needs 100 USDC in its perps account).
+  if (hlReferral.status === 'fulfilled') {
+    stats.push(stat(usd(Number(hlReferral.value.builderRewards ?? 0)), 'Hyperliquid fees earned'));
+  } else {
+    problems.push(`Hyperliquid fees could not be loaded (${hlReferral.reason.message}).`);
+  }
+  if (hlState.status === 'fulfilled') {
+    const value = Number(hlState.value.marginSummary?.accountValue ?? 0);
+    if (value < HL_BUILDER_MIN) {
+      stats.push(stat('Off', 'Hyperliquid fee code', 'bad'));
+      needsYou(row('Hyperliquid fees are off', `Knight's fee wallet (${HL_FEE_WALLET.slice(0, 6)}…${HL_FEE_WALLET.slice(-4)}) has ${usd(value)} in its Hyperliquid perps account. Hyperliquid only pays the Knight fee once it holds at least $${HL_BUILDER_MIN} USDC, so trades run without it until then.`,
+        pill('Earnings', 'crit'), btn('Open Hyperliquid', 'https://app.hyperliquid.xyz/portfolio')));
+    } else {
+      stats.push(stat('On', 'Hyperliquid fee code', 'ok'));
+    }
+  }
+
+  document.getElementById('earn-strip').replaceChildren(...stats);
+  const note = document.getElementById('earn-note');
+  note.textContent = `${rule}${problems.length ? ` ${problems.join(' ')}` : ''}`;
+}
+
 const lists = main().catch((e) => {
   const p = document.getElementById('loaded');
   p.textContent = `The lists could not be loaded (${e.message}). Try reloading the page.`;
   p.className = 'sub error';
 });
 // The service check adds to the strip and to "Needs you", so it runs after both are filled.
-Promise.all([lists, extras()]).then(health);
+Promise.all([lists, extras()]).then(() => {
+  health();
+  getJson('app-config.json').then(earnings, () => earnings(null));
+});
 </script>
 </body>
 </html>
