@@ -29,6 +29,7 @@ body:
         - Friends
         - Invite friends
         - Ledger hardware wallet
+        - Swap: All coins list
     validations:
       required: true
   - type: dropdown
