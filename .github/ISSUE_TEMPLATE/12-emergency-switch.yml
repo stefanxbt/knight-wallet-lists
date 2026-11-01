@@ -42,6 +42,7 @@ body:
         - BlackFort ID sign-in (optional account)
         - Send feedback (shake or Settings > Help)
         - Custom split and split a past payment
+        - Shield scam check on the signing screen
     validations:
       required: true
   - type: dropdown

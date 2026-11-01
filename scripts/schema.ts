@@ -373,6 +373,7 @@ export const APP_FEATURES = {
   blackfortId: { label: 'BlackFort ID sign-in (optional account)', standard: 'testers' },
   testerFeedback: { label: 'Send feedback (shake or Settings > Help)', standard: 'testers' },
   customSplit: { label: 'Custom split and split a past payment', standard: 'testers' },
+  signShield: { label: 'Shield scam check on the signing screen', standard: 'testers' },
 } as const satisfies Record<string, { label: string; standard: FeatureState }>;
 export type AppFeature = keyof typeof APP_FEATURES;
 const isAppFeature = (key: string): key is AppFeature => Object.prototype.hasOwnProperty.call(APP_FEATURES, key);
