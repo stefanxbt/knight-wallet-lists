@@ -33,6 +33,7 @@ body:
         - Cross-chain swaps
         - Move wallet to another phone (QR)
         - Light mode and theme switcher
+        - Swaps on Solana
     validations:
       required: true
   - type: dropdown
