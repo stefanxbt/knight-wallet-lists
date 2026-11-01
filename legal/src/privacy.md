@@ -6,7 +6,7 @@ This policy explains what personal data Knight Wallet ("Knight") handles, why, a
 
 ## 1. The short version
 
-- **No account, no sign-up, no name, no email, no phone number.** You use Knight without telling us who you are.
+- **No account needed, no sign-up, no name, no email, no phone number.** You use Knight without telling us who you are. Signing in with a BlackFort ID is optional (see below).
 - **Your recovery phrase and private keys never leave your device.** We cannot see them.
 - **No ads, no ad tracking, no selling of data.** Knight does not track you across other apps or websites.
 - To work, Knight has to send **public wallet addresses** and some technical data (such as your IP address) to blockchain and service providers. This section explains each one.
@@ -24,9 +24,13 @@ This policy explains what personal data Knight Wallet ("Knight") handles, why, a
 | Price and exchange-rate requests | When prices load | CoinGecko, DefiLlama, open.er-api.com | To show values in your currency | Contract |
 | Feature lists and settings | Each time Knight opens | GitHub (where our public lists are hosted), through our Cloudflare cache | To show tokens, dApps, scam lists and switches | Legitimate interest |
 | Knight Pro purchase status | Only if you subscribe | Apple App Store or Google Play | To give you Pro features | Contract |
+| Error reports: what went wrong (error text and code location), app version, phone model and system version | When the app hits an error, unless you turn reports off in Settings > Security > Send error reports | Sentry (Functional Software, Inc.), stored in the EU (Germany) | To find and fix bugs | Legitimate interest (you can opt out at any time) |
 | Messages you send us | Only if you email us | Our email provider | To answer you | Legitimate interest |
+| BlackFort ID account: name, email, account number and sign-in tokens | Only if you choose to sign in with BlackFort ID | BlackFort ID, run by BlackFort (a separate company), which holds your account. Knight keeps the sign-in tokens, your name and your email only on your phone | To sign you in to optional account features | Consent (you can sign out at any time) |
 
 **Card purchases (Ramp, MoonPay).** When you buy or sell crypto with a card or bank transfer, the provider collects your identity and payment details itself, under its own privacy policy. We do not receive your card number or ID documents.
+
+**BlackFort ID (optional).** If you sign in with BlackFort ID, you type your password on BlackFort's own page, not in Knight. BlackFort is an independent controller of your account data under its own privacy notice. Knight does not send your wallet addresses, keys or recovery phrase to BlackFort ID, and your wallet works fully without an account. Signing out deletes the sign-in tokens from your phone and asks BlackFort ID to cancel them.
 
 **dApps and WalletConnect.** When you connect a dApp, that dApp and the WalletConnect relay see your public address and the requests you approve. They are independent controllers.
 
@@ -36,7 +40,7 @@ Recovery phrase, private keys, PIN, address book, wallet names, settings, transa
 
 ## 4. What we do not do
 
-We do not use analytics or crash-reporting tools today, we do not use advertising IDs, we do not build profiles, and we do not sell or rent personal data. If we add analytics or crash reports later, we will update this policy and the store privacy labels first and ask for consent where the law requires it.
+We do not use analytics or ad tracking, we do not use advertising IDs, we do not build profiles, and we do not sell or rent personal data. The only diagnostics are the error reports above: before a report leaves your phone, Knight removes recovery phrases, private keys, wallet addresses, transaction hashes, sign-in tokens and email addresses, and it never attaches screenshots or a user profile. Like any internet request, Sentry sees the connection's IP address; Knight does not ask it to store it with the report. You can turn reports off in Settings > Security > Send error reports. If we add analytics later, we will update this policy and the store privacy labels first and ask for consent where the law requires it.
 
 ## 5. Cookies
 
@@ -47,11 +51,12 @@ The Knight app does not use cookies. The built-in browser stores cookies for the
 - Alert registrations (push token and watched addresses): until you turn alerts off, or 12 months after your app last checked in.
 - Gateway and security logs at Cloudflare: up to 30 days. [CHECK: confirm Cloudflare log retention setting.]
 - Safety-check results: cached up to 24 hours, not linked to you.
+- Error reports at Sentry: up to 90 days, then deleted automatically.
 - Emails: up to 2 years after the conversation ends.
 
 ## 7. Sharing
 
-We share data only with the service providers listed above, to run Knight, and with authorities when the law requires it. Our main providers are Cloudflare (hosting and gateway), Google Firebase (push messages), Alchemy (blockchain data), GoPlus (safety checks) and GitHub (public lists). Each provider must protect data at least as well as this policy requires.
+We share data only with the service providers listed above, to run Knight, and with authorities when the law requires it. Our main providers are Cloudflare (hosting and gateway), Google Firebase (push messages), Alchemy (blockchain data), GoPlus (safety checks), Sentry (error reports, EU) and GitHub (public lists). Each provider must protect data at least as well as this policy requires.
 
 ## 8. International transfers
 

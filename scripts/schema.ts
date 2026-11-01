@@ -370,6 +370,7 @@ export const APP_FEATURES = {
   proReports: { label: 'Pro – reports and tax export', standard: 'testers' },
   proAlerts: { label: 'Pro – alerts on watched wallets', standard: 'testers' },
   proThemes: { label: 'Pro – themes, icons and Knight card', standard: 'testers' },
+  blackfortId: { label: 'BlackFort ID sign-in (optional account)', standard: 'testers' },
 } as const satisfies Record<string, { label: string; standard: FeatureState }>;
 export type AppFeature = keyof typeof APP_FEATURES;
 const isAppFeature = (key: string): key is AppFeature => Object.prototype.hasOwnProperty.call(APP_FEATURES, key);
